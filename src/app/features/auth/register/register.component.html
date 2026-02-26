@@ -1,0 +1,71 @@
+<div class="auth-page">
+    <div class="auth-backdrop"></div>
+    <div class="auth-grain"></div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <a routerLink="/" class="auth-logo">CINÉMA</a>
+            <h1>Inscription</h1>
+            <p>Créez votre compte</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+            @if (error()) {
+                <div class="auth-error" role="alert">{{ error() }}</div>
+            }
+
+            <div class="form-group">
+                <label for="name">Nom</label>
+                <input
+                    id="name"
+                    type="text"
+                    formControlName="name"
+                    placeholder="Jean Dupont"
+                    autocomplete="name"
+                    class="form-input"
+                />
+                @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                    <span class="form-error">Minimum 2 caractères</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    placeholder="vous&#64;exemple.com"
+                    autocomplete="email"
+                    class="form-input"
+                />
+                @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                    <span class="form-error">Email valide requis</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input
+                    id="password"
+                    type="password"
+                    formControlName="password"
+                    placeholder="Minimum 8 caractères"
+                    autocomplete="new-password"
+                    class="form-input"
+                />
+                @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                    <span class="form-error">Minimum 8 caractères</span>
+                }
+            </div>
+
+            <button type="submit" class="btn-primary" [disabled]="loading()">
+                {{ loading() ? 'Inscription...' : "S'inscrire" }}
+            </button>
+        </form>
+
+        <p class="auth-footer">
+            Déjà un compte ? <a routerLink="/login">Se connecter</a>
+        </p>
+    </div>
+</div>

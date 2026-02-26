@@ -1,0 +1,61 @@
+<div class="auth-page">
+    <div class="auth-backdrop"></div>
+    <div class="auth-grain"></div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <a routerLink="/" class="auth-logo">CINÉMA</a>
+            <h1>Connexion</h1>
+            <p>Accédez à votre compte</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+            @if (error()) {
+                <div class="auth-error" role="alert">{{ error() }}</div>
+            }
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    placeholder="vous&#64;exemple.com"
+                    autocomplete="email"
+                    class="form-input"
+                />
+                @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                    <span class="form-error">Email valide requis</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input
+                    id="password"
+                    type="password"
+                    formControlName="password"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                    class="form-input"
+                />
+                @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                    <span class="form-error">Minimum 6 caractères</span>
+                }
+            </div>
+
+            <label class="checkbox-wrap">
+                <input type="checkbox" formControlName="rememberMe" />
+                <span>Se souvenir de moi</span>
+            </label>
+
+            <button type="submit" class="btn-primary" [disabled]="loading()">
+                {{ loading() ? 'Connexion...' : 'Se connecter' }}
+            </button>
+        </form>
+
+        <p class="auth-footer">
+            Pas encore de compte ? <a routerLink="/register">S'inscrire</a>
+        </p>
+    </div>
+</div>
