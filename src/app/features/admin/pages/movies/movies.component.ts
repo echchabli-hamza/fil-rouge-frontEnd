@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MovieService } from '../../../../core/services/movie.service';
 import { CategoryService } from '../../../../core/services/category.service';
-import { Movie, Category } from '../../../../core/models/admin.models';
+import { Movie, MovieDTO, Category } from '../../../../core/models/admin.models';
 
 @Component({
     selector: 'app-movies',
@@ -15,7 +15,7 @@ export class MoviesComponent implements OnInit {
     movieSvc = inject(MovieService);
     private catSvc = inject(CategoryService);
 
-    movies = signal<Movie[]>([]);
+    movies = signal<MovieDTO[]>([]);
     categories = signal<Category[]>([]);
     loading = signal(false);
     error = signal('');
@@ -56,8 +56,8 @@ export class MoviesComponent implements OnInit {
         this.showForm = true;
     }
 
-    openEdit(movie: Movie): void {
-        this.editingId = movie.id ?? null;
+    openEdit(movie: MovieDTO): void {
+        this.editingId = movie.id;
         this.form = {
             title: movie.title,
             synopsis: movie.synopsis ?? '',
@@ -67,7 +67,7 @@ export class MoviesComponent implements OnInit {
             popularityScore: movie.popularityScore,
             rating: movie.rating,
         };
-        this.selectedCategoryId = movie.category?.id ?? null;
+        this.selectedCategoryId = movie.categoryId ?? null;
         this.selectedImage = null;
         this.imagePreview = movie.imagePath ? `${this.movieSvc.apiUrl}${movie.imagePath}` : null;
         this.showForm = true;

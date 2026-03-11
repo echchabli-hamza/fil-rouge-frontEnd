@@ -25,12 +25,25 @@ export const routes: Routes = [
             import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
     },
 
-    // Admin dashboard – admin only
+    // Admin area – admin only
     {
         path: 'dash',
         canActivate: [authGuard, adminGuard],
         loadComponent: () =>
-            import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+            import('./features/admin/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
+        children: [
+            { path: '', redirectTo: 'categories', pathMatch: 'full' },
+            {
+                path: 'categories',
+                loadComponent: () =>
+                    import('./features/admin/pages/categories/categories.component').then((m) => m.CategoriesComponent),
+            },
+            {
+                path: 'movies',
+                loadComponent: () =>
+                    import('./features/admin/pages/movies/movies.component').then((m) => m.MoviesComponent),
+            },
+        ],
     },
 
     // Protected pages (auth required)

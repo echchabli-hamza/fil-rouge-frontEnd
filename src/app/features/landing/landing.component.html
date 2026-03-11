@@ -1,24 +1,145 @@
-<div class="landing">
-    <div class="landing-backdrop"></div>
-    <div class="landing-gradient"></div>
-    <div class="landing-grain"></div>
+<!-- ═══ HERO CAROUSEL ═══ -->
+<section class="home-hero">
+    <div class="home-hero-grain"></div>
 
-    <div class="landing-content">
-        <h1 class="landing-title">
-            <span class="landing-title-main">L'expérience</span>
-            <span class="landing-title-accent">cinéma</span>
-        </h1>
-        <p class="landing-subtitle">
-            Découvrez des films comme jamais auparavant. L'art du grand écran à portée de clic.
-        </p>
-        <div class="landing-actions">
-            <a routerLink="/register" class="btn-primary btn-hero">Commencer</a>
-            <a routerLink="/login" class="btn-secondary btn-hero">Se connecter</a>
+    @for (movie of heroMovies; track movie.id; let i = $index) {
+    <div class="home-hero-slide" [class.active]="i === heroSlide">
+        <div class="home-hero-bg"></div>
+        <div class="home-hero-overlay"></div>
+        <div class="home-hero-content">
+            <span class="home-hero-badge">{{ movie.category }}</span>
+            <h1 class="home-hero-title">{{ movie.title }}</h1>
+            <p class="home-hero-synopsis">{{ movie.synopsis }}</p>
+            <div class="home-hero-meta">
+                <span class="home-hero-year">{{ movie.year }}</span>
+                <span class="home-hero-rating">★ {{ movie.rating }}</span>
+            </div>
+            <div class="home-hero-actions">
+                <button class="btn-primary btn-hero">▶ Voir le film</button>
+                <button class="btn-secondary btn-hero">+ Ma liste</button>
+            </div>
         </div>
     </div>
+    }
 
-    <div class="landing-scroll">
-        <span>Défiler</span>
-        <div class="landing-scroll-line"></div>
+    <button class="home-hero-arrow home-hero-prev" (click)="prevSlide()">‹</button>
+    <button class="home-hero-arrow home-hero-next" (click)="nextSlide()">›</button>
+
+    <div class="home-hero-dots">
+        @for (movie of heroMovies; track movie.id; let i = $index) {
+        <button class="home-hero-dot" [class.active]="i === heroSlide" (click)="goToSlide(i)"></button>
+        }
     </div>
-</div>
+</section>
+
+<!-- ═══ TENDANCES 🔥 ═══ -->
+<section class="home-section">
+    <div class="home-section-header">
+        <h2 class="home-section-title">🔥 Tendances de la semaine</h2>
+        <button class="home-section-more">Voir tout →</button>
+    </div>
+    <div class="home-scroll-row">
+        @for (movie of trendingMovies; track movie.id) {
+        <div class="movie-card">
+            <div class="movie-card-poster">
+                <div class="movie-card-placeholder">
+                    <span>{{ getInitials(movie.title) }}</span>
+                </div>
+                <div class="movie-card-overlay">
+                    <span class="movie-card-play">▶</span>
+                </div>
+            </div>
+            <div class="movie-card-info">
+                <h3 class="movie-card-title">{{ movie.title }}</h3>
+                <div class="movie-card-meta">
+                    <span>{{ movie.year }}</span>
+                    <span class="movie-card-rating">★ {{ movie.rating }}</span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</section>
+
+<!-- ═══ NOUVEAUTÉS ✨ ═══ -->
+<section class="home-section">
+    <div class="home-section-header">
+        <h2 class="home-section-title">✨ Nouveautés</h2>
+        <button class="home-section-more">Voir tout →</button>
+    </div>
+    <div class="home-scroll-row">
+        @for (movie of newReleases; track movie.id) {
+        <div class="movie-card">
+            <div class="movie-card-poster">
+                <div class="movie-card-placeholder">
+                    <span>{{ getInitials(movie.title) }}</span>
+                </div>
+                <div class="movie-card-overlay">
+                    <span class="movie-card-play">▶</span>
+                </div>
+                <span class="movie-card-badge">Nouveau</span>
+            </div>
+            <div class="movie-card-info">
+                <h3 class="movie-card-title">{{ movie.title }}</h3>
+                <div class="movie-card-meta">
+                    <span>{{ movie.year }}</span>
+                    <span class="movie-card-rating">★ {{ movie.rating }}</span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</section>
+
+<!-- ═══ TOP FILMS 🏆 ═══ -->
+<section class="home-section">
+    <div class="home-section-header">
+        <h2 class="home-section-title">🏆 Top Films</h2>
+        <button class="home-section-more">Voir tout →</button>
+    </div>
+    <div class="home-scroll-row">
+        @for (movie of topMovies; track movie.id; let i = $index) {
+        <div class="movie-card movie-card-ranked">
+            <span class="movie-card-rank">#{{ i + 1 }}</span>
+            <div class="movie-card-poster">
+                <div class="movie-card-placeholder movie-card-placeholder-gold">
+                    <span>{{ getInitials(movie.title) }}</span>
+                </div>
+                <div class="movie-card-overlay">
+                    <span class="movie-card-play">▶</span>
+                </div>
+            </div>
+            <div class="movie-card-info">
+                <h3 class="movie-card-title">{{ movie.title }}</h3>
+                <div class="movie-card-meta">
+                    <span>{{ movie.year }}</span>
+                    <span class="movie-card-rating">★ {{ movie.rating }}</span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</section>
+
+<!-- ═══ CATÉGORIES ═══ -->
+<section class="home-section home-section-categories">
+    <div class="home-section-header">
+        <h2 class="home-section-title">🎬 Catégories</h2>
+    </div>
+    <div class="home-category-grid">
+        @for (cat of categories; track cat.id) {
+        <div class="home-category-card">
+            <span class="home-category-icon">{{ cat.icon }}</span>
+            <span class="home-category-name">{{ cat.name }}</span>
+        </div>
+        }
+    </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="home-footer">
+    <div class="home-footer-content">
+        <span class="home-footer-logo">CINÉMA</span>
+        <p class="home-footer-text">L'expérience cinéma ultime. © 2026</p>
+    </div>
+</footer>

@@ -14,12 +14,12 @@ export class MovieService {
 
     // ── Admin endpoints ───────────────────────────────────────────────────────
 
-    getAll(): Observable<Movie[]> {
-        return this.http.get<Movie[]>(this.base);
+    getAll(): Observable<MovieDTO[]> {
+        return this.http.get<MovieDTO[]>(this.base);
     }
 
-    getOne(id: number): Observable<Movie> {
-        return this.http.get<Movie>(`${this.base}/${id}`);
+    getOne(id: number): Observable<MovieDTO> {
+        return this.http.get<MovieDTO>(`${this.base}/${id}`);
     }
 
     create(movie: Movie, image: File): Observable<Movie> {
