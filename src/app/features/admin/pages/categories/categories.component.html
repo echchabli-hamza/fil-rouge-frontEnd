@@ -1,0 +1,96 @@
+<div class="admin-page">
+    <div class="admin-page-header">
+        <h1>Catégories</h1>
+        <button class="btn-admin-primary" (click)="openAdd()">+ Ajouter</button>
+    </div>
+
+    @if (successMsg()) {
+    <div class="admin-toast admin-toast-success">{{ successMsg() }}</div>
+    }
+    @if (error()) {
+    <div class="admin-toast admin-toast-error">{{ error() }}</div>
+    }
+
+    <!-- Modal Form -->
+    @if (showForm) {
+    <div class="admin-modal-backdrop" (click)="closeForm()"></div>
+    <div class="admin-modal">
+        <div class="admin-modal-header">
+            <h2>{{ editingId ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h2>
+            <button class="admin-modal-close" (click)="closeForm()">✕</button>
+        </div>
+        <form class="admin-form" (ngSubmit)="save()">
+            <div class="admin-form-group">
+                <label>Nom *</label>
+                <input class="admin-input" type="text" [(ngModel)]="form.name" name="name" placeholder="Ex: Action"
+                    required />
+            </div>
+            <div class="admin-form-group">
+                <label>Image {{ editingId ? '(laisser vide pour garder l\'actuelle)' : '*' }}</label>
+                <input class="admin-input" type="file" accept="image/*" (change)="onFileSelected($event)" />
+            </div>
+            @if (imagePreview) {
+            <img [src]="imagePreview" alt="preview" class="admin-img-preview" />
+            }
+            <div class="admin-form-actions">
+                <button type="button" class="btn-admin-secondary" (click)="closeForm()">Annuler</button>
+                <button type="submit" class="btn-admin-primary" [disabled]="saving">
+                    {{ saving ? 'Sauvegarde…' : 'Sauvegarder' }}
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- Delete Confirm -->
+    @if (deletingId !== null) {
+    <div class="admin-modal-backdrop" (click)="cancelDelete()"></div>
+    <div class="admin-modal admin-modal-sm">
+        <h2>Confirmer la suppression</h2>
+        <p>Cette catégorie sera supprimée définitivement.</p>
+        <div class="admin-form-actions">
+            <button class="btn-admin-secondary" (click)="cancelDelete()">Annuler</button>
+            <button class="btn-admin-danger" (click)="doDelete()">Supprimer</button>
+        </div>
+    </div>
+    }
+
+    <!-- Table -->
+    @if (loading()) {
+    <div class="admin-loading">Chargement…</div>
+    } @else {
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (cat of categories(); track cat.id) {
+                <tr>
+                    <td>{{ cat.name }}</td>
+                    <td>
+                        @if (cat.imagePath) {
+                        <img [src]="getImageSrc(cat.imagePath)" [alt]="cat.name" class="admin-table-img" />
+                        } @else {
+                        <span class="admin-no-img">—</span>
+                        }
+                    </td>
+                    <td class="admin-actions">
+                        <button class="btn-admin-edit" (click)="openEdit(cat)">Modifier</button>
+                        <button class="btn-admin-danger-sm" (click)="confirmDelete(cat.id!)">Supprimer</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="3" class="admin-empty">Aucune catégorie trouvée.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

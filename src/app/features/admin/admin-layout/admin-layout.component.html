@@ -1,0 +1,41 @@
+<div class="admin-layout">
+    <!-- Mobile sidebar toggle -->
+    <button class="admin-sidebar-toggle" (click)="sidebarOpen = !sidebarOpen" [class.open]="sidebarOpen" aria-label="Toggle sidebar">
+        <span></span><span></span><span></span>
+    </button>
+
+    <!-- Left Sidebar -->
+    <aside class="admin-sidebar" [class.admin-sidebar-open]="sidebarOpen">
+        <div class="admin-sidebar-header">
+            <span class="admin-sidebar-logo">ADMIN</span>
+        </div>
+        <nav class="admin-sidebar-nav">
+            <a routerLink="categories" routerLinkActive="admin-sidebar-link-active" class="admin-sidebar-link" (click)="sidebarOpen=false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Catégories
+            </a>
+            <a routerLink="movies" routerLinkActive="admin-sidebar-link-active" class="admin-sidebar-link" (click)="sidebarOpen=false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+                Films
+            </a>
+        </nav>
+        <div class="admin-sidebar-footer">
+            <a routerLink="/" class="admin-sidebar-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Accueil
+            </a>
+            <button class="admin-sidebar-link admin-logout-btn" (click)="logout()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile -->
+    <div class="admin-sidebar-overlay" [class.visible]="sidebarOpen" (click)="sidebarOpen=false"></div>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <router-outlet />
+    </main>
+</div>

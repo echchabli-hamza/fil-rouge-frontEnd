@@ -1,0 +1,146 @@
+<div class="admin-page">
+    <div class="admin-page-header">
+        <h1>Films</h1>
+        <button class="btn-admin-primary" (click)="openAdd()">+ Ajouter</button>
+    </div>
+
+    @if (successMsg()) {
+    <div class="admin-toast admin-toast-success">{{ successMsg() }}</div>
+    }
+    @if (error()) {
+    <div class="admin-toast admin-toast-error">{{ error() }}</div>
+    }
+
+    <!-- Add/Edit Modal -->
+    @if (showForm) {
+    <div class="admin-modal-backdrop" (click)="closeForm()"></div>
+    <div class="admin-modal admin-modal-lg">
+        <div class="admin-modal-header">
+            <h2>{{ editingId ? 'Modifier le film' : 'Nouveau film' }}</h2>
+            <button class="admin-modal-close" (click)="closeForm()">✕</button>
+        </div>
+        <form class="admin-form" (ngSubmit)="save()">
+            <div class="admin-form-row">
+                <div class="admin-form-group">
+                    <label>Titre *</label>
+                    <input class="admin-input" type="text" [(ngModel)]="form.title" name="title"
+                        placeholder="Titre du film" required />
+                </div>
+                <div class="admin-form-group">
+                    <label>Réalisateur</label>
+                    <input class="admin-input" type="text" [(ngModel)]="form.director" name="director"
+                        placeholder="Nom du réalisateur" />
+                </div>
+            </div>
+            <div class="admin-form-row">
+                <div class="admin-form-group">
+                    <label>Année de sortie</label>
+                    <input class="admin-input" type="number" [(ngModel)]="form.releaseYear" name="releaseYear"
+                        placeholder="2024" />
+                </div>
+                <div class="admin-form-group">
+                    <label>Catégorie</label>
+                    <select class="admin-input" [(ngModel)]="selectedCategoryId" name="categoryId">
+                        <option [ngValue]="null">— Aucune —</option>
+                        @for (cat of categories(); track cat.id) {
+                        <option [ngValue]="cat.id">{{ cat.name }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label>Synopsis</label>
+                <textarea class="admin-input admin-textarea" [(ngModel)]="form.synopsis" name="synopsis" rows="3"
+                    placeholder="Résumé du film…"></textarea>
+            </div>
+            <div class="admin-form-group">
+                <label>Acteurs</label>
+                <input class="admin-input" type="text" [(ngModel)]="form.actors" name="actors"
+                    placeholder="Acteur 1, Acteur 2…" />
+            </div>
+            <div class="admin-form-group">
+                <label>Image {{ editingId ? '(laisser vide pour garder l\'actuelle)' : '*' }}</label>
+                <input class="admin-input admin-file-input" type="file" accept="image/*"
+                    (change)="onFileChange($event)" name="image" />
+            </div>
+            @if (imagePreview) {
+            <img [src]="imagePreview" alt="preview" class="admin-img-preview" />
+            }
+            <div class="admin-form-actions">
+                <button type="button" class="btn-admin-secondary" (click)="closeForm()">Annuler</button>
+                <button type="submit" class="btn-admin-primary" [disabled]="saving">
+                    {{ saving ? 'Sauvegarde…' : 'Sauvegarder' }}
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- Delete Confirm -->
+    @if (deletingId !== null) {
+    <div class="admin-modal-backdrop" (click)="cancelDelete()"></div>
+    <div class="admin-modal admin-modal-sm">
+        <h2>Confirmer la suppression</h2>
+        <p>Ce film sera supprimé définitivement.</p>
+        <div class="admin-form-actions">
+            <button class="btn-admin-secondary" (click)="cancelDelete()">Annuler</button>
+            <button class="btn-admin-danger" (click)="doDelete()">Supprimer</button>
+        </div>
+    </div>
+    }
+
+    <!-- Table -->
+    @if (loading()) {
+    <div class="admin-loading">Chargement…</div>
+    } @else {
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <!-- <th>#</th> -->
+                    <th>Affiche</th>
+                    <th>Titre</th>
+                    <th>Réalisateur</th>
+                    <th>Année</th>
+                    <th>Catégorie</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (movie of movies(); track movie.id) {
+                <tr>
+                    <!-- <td>{{ movie.id }}</td> -->
+                    <td>
+                        @if (movie.imagePath) {
+                        <img [src]="movieSvc.apiUrl + movie.imagePath" [alt]="movie.title" class="admin-table-img" />
+                        } @else {
+                        <span class="admin-no-img">—</span>
+                        }
+                    </td>
+                    <td class="admin-cell-title">{{ movie.title }}</td>
+                    <td>{{ movie.director || '—' }}</td>
+                    <td>{{ movie.releaseYear || '—' }}</td>
+                    <td>{{ movie.categoryName || '—' }}</td>
+                    <td>
+                        @if (movie.rating) {
+                        <span class="admin-rating">★ {{ movie.rating | number:'1.1-1' }}</span>
+                        } @else {
+                        —
+                        }
+                    </td>
+                    <td class="admin-actions">
+                        <button class="btn-admin-edit" (click)="openEdit(movie)">Modifier</button>
+                        <button class="btn-admin-danger-sm" (click)="confirmDelete(movie.id!)">Supprimer</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="7" class="admin-empty">Aucun film trouvé.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>
