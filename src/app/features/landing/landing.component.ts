@@ -1,56 +1,136 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
+import { MovieService } from '../../core/services/movie.service';
+import { CategoryService } from '../../core/services/category.service';
+import { MovieDTO, Category } from '../../core/models/admin.models';
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'app-landing',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule],
     templateUrl: './landing.component.html',
 })
-export class LandingComponent {
-    // Placeholder data — will be replaced with real API calls
+export class LandingComponent implements OnInit, OnDestroy {
+    private auth = inject(AuthService);
+    private movieService = inject(MovieService);
+    private categoryService = inject(CategoryService);
+    private cdr = inject(ChangeDetectorRef);
+
+    readonly apiUrl = environment.apiUrl;
+
+    get isLoggedIn(): boolean {
+        return this.auth.isLoggedIn();
+    }
+
     heroSlide = 0;
+    private heroTimer: any;
+    loading = true;
+    private pendingCalls = 5;
 
-    heroMovies = [
-        { id: 1, title: 'Placeholder Film 1', category: 'Action', synopsis: 'Synopsis placeholder text goes here...', year: 2026, rating: 8.5 },
-        { id: 2, title: 'Placeholder Film 2', category: 'Drame', synopsis: 'Another synopsis placeholder...', year: 2025, rating: 9.1 },
-        { id: 3, title: 'Placeholder Film 3', category: 'Sci-Fi', synopsis: 'Third synopsis placeholder...', year: 2026, rating: 7.8 },
-    ];
+    heroMovies: MovieDTO[] = [];
+    trendingMovies: MovieDTO[] = [];
+    newReleases: MovieDTO[] = [];
+    topMovies: MovieDTO[] = [];
+    categories: Category[] = [];
 
-    trendingMovies = Array.from({ length: 6 }, (_, i) => ({
-        id: i + 10, title: `Trending ${i + 1}`, year: 2026, rating: +(7 + Math.random() * 2).toFixed(1),
-    }));
+    private categoryIcons: Record<string, string> = {
+        'Action': '💥', 'Comédie': '😂', 'Drame': '🎭', 'Science-Fiction': '🚀',
+        'Horreur': '👻', 'Romance': '❤️', 'Thriller': '🔪', 'Animation': '🎨',
+        'Aventure': '🏔️', 'Documentaire': '📹', 'Fantastique': '🧙', 'Guerre': '⚔️',
+        'Historique': '📜', 'Musical': '🎵', 'Policier': '🔍', 'Western': '🤠',
+    };
 
-    newReleases = Array.from({ length: 6 }, (_, i) => ({
-        id: i + 20, title: `New Release ${i + 1}`, year: 2026, rating: +(7 + Math.random() * 2).toFixed(1),
-    }));
+    ngOnInit(): void {
+        this.loadData();
+    }
 
-    topMovies = Array.from({ length: 6 }, (_, i) => ({
-        id: i + 30, title: `Top Film ${i + 1}`, year: 2025, rating: +(8 + Math.random()).toFixed(1),
-    }));
+    ngOnDestroy(): void {
+        clearInterval(this.heroTimer);
+    }
 
-    categories = [
-        { id: 1, name: 'Action', icon: '💥' },
-        { id: 2, name: 'Comédie', icon: '😂' },
-        { id: 3, name: 'Drame', icon: '🎭' },
-        { id: 4, name: 'Science-Fiction', icon: '🚀' },
-        { id: 5, name: 'Horreur', icon: '👻' },
-        { id: 6, name: 'Romance', icon: '❤️' },
-        { id: 7, name: 'Thriller', icon: '🔪' },
-        { id: 8, name: 'Animation', icon: '🎨' },
-    ];
+    private onCallDone(): void {
+        this.pendingCalls--;
+        if (this.pendingCalls <= 0) {
+            this.loading = false;
+            // Fallback: if featured returned nothing, use trending for hero
+            if (this.heroMovies.length === 0 && this.trendingMovies.length > 0) {
+                this.heroMovies = this.trendingMovies.slice(0, 5);
+            }
+            if (this.heroMovies.length > 0) {
+                this.startHeroTimer();
+            }
+            this.cdr.detectChanges();
+        }
+    }
+
+    private loadData(): void {
+        this.movieService.getFeatured().subscribe({
+            next: (data) => { this.heroMovies = data; this.cdr.detectChanges(); },
+            error: (e) => { console.error('featured error', e); this.onCallDone(); },
+            complete: () => this.onCallDone(),
+        });
+
+        this.movieService.getTrending().subscribe({
+            next: (data) => { this.trendingMovies = data; this.cdr.detectChanges(); },
+            error: (e) => { console.error('trending error', e); this.onCallDone(); },
+            complete: () => this.onCallDone(),
+        });
+
+        this.movieService.getNewReleases().subscribe({
+            next: (data) => { this.newReleases = data; this.cdr.detectChanges(); },
+            error: (e) => { console.error('newReleases error', e); this.onCallDone(); },
+            complete: () => this.onCallDone(),
+        });
+
+        this.movieService.getTopRated().subscribe({
+            next: (data) => { this.topMovies = data; this.cdr.detectChanges(); },
+            error: (e) => { console.error('topRated error', e); this.onCallDone(); },
+            complete: () => this.onCallDone(),
+        });
+
+        this.categoryService.getPublicAll().subscribe({
+            next: (data) => { this.categories = data; this.cdr.detectChanges(); },
+            error: (e) => { console.error('categories error', e); this.onCallDone(); },
+            complete: () => this.onCallDone(),
+        });
+    }
+
+    getCategoryIcon(name: string): string {
+        return this.categoryIcons[name] || '🎬';
+    }
+
+    getImageUrl(path: string | null): string {
+        if (!path) return '';
+        return path.startsWith('http') ? path : this.apiUrl + path;
+    }
 
     nextSlide(): void {
         this.heroSlide = (this.heroSlide + 1) % this.heroMovies.length;
+        this.restartTimer();
     }
+
     prevSlide(): void {
         this.heroSlide = (this.heroSlide - 1 + this.heroMovies.length) % this.heroMovies.length;
+        this.restartTimer();
     }
+
     goToSlide(i: number): void {
         this.heroSlide = i;
+        this.restartTimer();
     }
+
     getInitials(title: string): string {
         return title.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    }
+
+    private startHeroTimer(): void {
+        this.heroTimer = setInterval(() => this.nextSlide(), 6000);
+    }
+
+    private restartTimer(): void {
+        clearInterval(this.heroTimer);
+        this.startHeroTimer();
     }
 }

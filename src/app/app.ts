@@ -22,7 +22,7 @@ export class App implements OnInit {
 
     private updateHideNavbar(url: string): void {
         this.hideNavbar.set(
-            url.includes('/login') || url.includes('/register') || url.includes('/dash')
+            url.includes('/login') || url.includes('/register')
         );
     }
 }

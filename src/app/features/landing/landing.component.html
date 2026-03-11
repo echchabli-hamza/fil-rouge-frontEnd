@@ -4,18 +4,20 @@
 
     @for (movie of heroMovies; track movie.id; let i = $index) {
     <div class="home-hero-slide" [class.active]="i === heroSlide">
-        <div class="home-hero-bg"></div>
+        <div class="home-hero-bg"
+            [style.background-image]="movie.imagePath ? 'url(' + getImageUrl(movie.imagePath) + ')' : ''">
+        </div>
         <div class="home-hero-overlay"></div>
         <div class="home-hero-content">
-            <span class="home-hero-badge">{{ movie.category }}</span>
+            <span class="home-hero-badge">{{ movie.categoryName }}</span>
             <h1 class="home-hero-title">{{ movie.title }}</h1>
             <p class="home-hero-synopsis">{{ movie.synopsis }}</p>
             <div class="home-hero-meta">
-                <span class="home-hero-year">{{ movie.year }}</span>
+                <span class="home-hero-year">{{ movie.releaseYear }}</span>
                 <span class="home-hero-rating">★ {{ movie.rating }}</span>
             </div>
             <div class="home-hero-actions">
-                <button class="btn-primary btn-hero">▶ Voir le film</button>
+                <button class="btn-primary btn-hero">Plus d'infos</button>
                 <button class="btn-secondary btn-hero">+ Ma liste</button>
             </div>
         </div>
@@ -42,17 +44,21 @@
         @for (movie of trendingMovies; track movie.id) {
         <div class="movie-card">
             <div class="movie-card-poster">
+                @if (movie.imagePath) {
+                <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="movie-card-img">
+                } @else {
                 <div class="movie-card-placeholder">
                     <span>{{ getInitials(movie.title) }}</span>
                 </div>
+                }
                 <div class="movie-card-overlay">
-                    <span class="movie-card-play">▶</span>
+                    <span class="movie-card-play">ⓘ</span>
                 </div>
             </div>
             <div class="movie-card-info">
                 <h3 class="movie-card-title">{{ movie.title }}</h3>
                 <div class="movie-card-meta">
-                    <span>{{ movie.year }}</span>
+                    <span>{{ movie.releaseYear }}</span>
                     <span class="movie-card-rating">★ {{ movie.rating }}</span>
                 </div>
             </div>
@@ -71,18 +77,22 @@
         @for (movie of newReleases; track movie.id) {
         <div class="movie-card">
             <div class="movie-card-poster">
+                @if (movie.imagePath) {
+                <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="movie-card-img">
+                } @else {
                 <div class="movie-card-placeholder">
                     <span>{{ getInitials(movie.title) }}</span>
                 </div>
+                }
                 <div class="movie-card-overlay">
-                    <span class="movie-card-play">▶</span>
+                    <span class="movie-card-play">ⓘ</span>
                 </div>
                 <span class="movie-card-badge">Nouveau</span>
             </div>
             <div class="movie-card-info">
                 <h3 class="movie-card-title">{{ movie.title }}</h3>
                 <div class="movie-card-meta">
-                    <span>{{ movie.year }}</span>
+                    <span>{{ movie.releaseYear }}</span>
                     <span class="movie-card-rating">★ {{ movie.rating }}</span>
                 </div>
             </div>
@@ -102,17 +112,21 @@
         <div class="movie-card movie-card-ranked">
             <span class="movie-card-rank">#{{ i + 1 }}</span>
             <div class="movie-card-poster">
+                @if (movie.imagePath) {
+                <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="movie-card-img">
+                } @else {
                 <div class="movie-card-placeholder movie-card-placeholder-gold">
                     <span>{{ getInitials(movie.title) }}</span>
                 </div>
+                }
                 <div class="movie-card-overlay">
-                    <span class="movie-card-play">▶</span>
+                    <span class="movie-card-play">ⓘ</span>
                 </div>
             </div>
             <div class="movie-card-info">
                 <h3 class="movie-card-title">{{ movie.title }}</h3>
                 <div class="movie-card-meta">
-                    <span>{{ movie.year }}</span>
+                    <span>{{ movie.releaseYear }}</span>
                     <span class="movie-card-rating">★ {{ movie.rating }}</span>
                 </div>
             </div>
@@ -129,7 +143,7 @@
     <div class="home-category-grid">
         @for (cat of categories; track cat.id) {
         <div class="home-category-card">
-            <span class="home-category-icon">{{ cat.icon }}</span>
+            <span class="home-category-icon">{{ getCategoryIcon(cat.name) }}</span>
             <span class="home-category-name">{{ cat.name }}</span>
         </div>
         }

@@ -29,12 +29,7 @@ export interface MovieDTO {
     director: string;
     actors: string;
     popularityScore: number;
-    /** Legacy single-image field — kept for backward compat */
     imagePath: string;
-    /** Poster image URL (card thumbnails). Falls back to imagePath when empty. */
-    poster: string;
-    /** Backdrop / banner image URL (hero carousel). Falls back to imagePath when empty. */
-    backdrop: string;
     rating: number;
     categoryId: number;
     categoryName: string;

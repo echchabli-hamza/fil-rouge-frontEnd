@@ -676,6 +676,32 @@ body {
   color: rgba(255, 255, 255, 0.3);
 }
 
+/* ── Loading ────────────────────────────────────────────────────────────── */
+
+.home-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  gap: 1.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+}
+
+.home-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #e50914;
+  border-radius: 50%;
+  animation: home-spin 0.8s linear infinite;
+}
+
+@keyframes home-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
@@ -691,7 +717,7 @@ body {
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -854,7 +880,7 @@ body {
 
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
   background: var(--cinema-black, #0a0a0a);
 }
 
@@ -867,10 +893,10 @@ body {
   display: flex;
   flex-direction: column;
   position: fixed;
-  top: 0;
+  top: 64px;
   left: 0;
   bottom: 0;
-  z-index: 100;
+  z-index: 90;
   transition: transform 0.3s ease;
 }
 

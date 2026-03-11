@@ -62,4 +62,16 @@ export class MovieService {
     getTopRated(): Observable<MovieDTO[]> {
         return this.http.get<MovieDTO[]>(`${this.publicBase}/top-rated`);
     }
+
+    getRecommendations(): Observable<MovieDTO[]> {
+        return this.http.get<MovieDTO[]>(`${this.publicBase}/recommendations`);
+    }
+
+    getByCategory(categoryId: number): Observable<MovieDTO[]> {
+        return this.http.get<MovieDTO[]>(`${this.publicBase}/by-category/${categoryId}`);
+    }
+
+    search(query: string): Observable<MovieDTO[]> {
+        return this.http.get<MovieDTO[]>(`${this.publicBase}/search`, { params: { query } });
+    }
 }
