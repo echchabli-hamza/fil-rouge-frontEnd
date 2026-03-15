@@ -17,7 +17,7 @@
                 <span class="home-hero-rating">★ {{ movie.rating }}</span>
             </div>
             <div class="home-hero-actions">
-                <button class="btn-primary btn-hero">Plus d'infos</button>
+                <button class="btn-primary btn-hero" (click)="goToMovie(movie.id)">Plus d'infos</button>
                 <button class="btn-secondary btn-hero">+ Ma liste</button>
             </div>
         </div>
@@ -42,7 +42,7 @@
     </div>
     <div class="home-scroll-row">
         @for (movie of trendingMovies; track movie.id) {
-        <div class="movie-card">
+        <div class="movie-card" (click)="goToMovie(movie.id)">
             <div class="movie-card-poster">
                 @if (movie.imagePath) {
                 <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="movie-card-img">
@@ -75,7 +75,7 @@
     </div>
     <div class="home-scroll-row">
         @for (movie of newReleases; track movie.id) {
-        <div class="movie-card">
+        <div class="movie-card" (click)="goToMovie(movie.id)">
             <div class="movie-card-poster">
                 @if (movie.imagePath) {
                 <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="movie-card-img">
@@ -109,7 +109,7 @@
     </div>
     <div class="home-scroll-row">
         @for (movie of topMovies; track movie.id; let i = $index) {
-        <div class="movie-card movie-card-ranked">
+        <div class="movie-card movie-card-ranked" (click)="goToMovie(movie.id)">
             <span class="movie-card-rank">#{{ i + 1 }}</span>
             <div class="movie-card-poster">
                 @if (movie.imagePath) {

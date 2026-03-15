@@ -46,6 +46,13 @@ export const routes: Routes = [
         ],
     },
 
+    // Movie detail (public)
+    {
+        path: 'movie/:id',
+        loadComponent: () =>
+            import('./features/movie-detail/movie-detail.component').then((m) => m.MovieDetailComponent),
+    },
+
     // Protected pages (auth required)
     {
         path: 'profile',

@@ -1,0 +1,303 @@
+<!-- ═══ PROFILE HEADER ═══ -->
+<section class="profile-hero">
+    <div class="profile-hero-bg"></div>
+    <div class="profile-hero-overlay"></div>
+    <div class="profile-hero-content">
+        <div class="profile-avatar">
+            <span>{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</span>
+        </div>
+        <div class="profile-user-info">
+            <h1 class="profile-name">{{ user?.name }}</h1>
+            <p class="profile-email">{{ user?.email }}</p>
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-num">{{ favorites.length }}</span>
+                    <span class="profile-stat-label">Favoris</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-num">{{ userLists.length }}</span>
+                    <span class="profile-stat-label">Listes</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-num">{{ recommendations.length }}</span>
+                    <span class="profile-stat-label">Suggestions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ TABS ═══ -->
+<nav class="profile-tabs">
+    <button class="profile-tab" [class.active]="activeTab === 'favorites'" (click)="switchTab('favorites')">
+        ❤️ Mes Favoris
+    </button>
+    <button class="profile-tab" [class.active]="activeTab === 'lists'" (click)="switchTab('lists')">
+        📋 Mes Listes
+    </button>
+    <button class="profile-tab" [class.active]="activeTab === 'recommendations'" (click)="switchTab('recommendations')">
+        ✨ Recommandations
+    </button>
+</nav>
+
+<!-- ═══ TAB CONTENT ═══ -->
+<div class="profile-content">
+
+    <!-- ── FAVORITES TAB ─────────────────────────────────────────────────── -->
+    @if (activeTab === 'favorites') {
+    <section class="profile-section">
+        @if (loadingFavorites) {
+        <div class="profile-loading">
+            <div class="home-loading-spinner"></div>
+        </div>
+        } @else if (favorites.length === 0) {
+        <div class="profile-empty">
+            <span class="profile-empty-icon">🤍</span>
+            <h3>Aucun favori pour le moment</h3>
+            <p>Explorez les films et ajoutez vos coups de cœur ici.</p>
+        </div>
+        } @else {
+        <div class="profile-movie-grid">
+            @for (movie of favorites; track movie.id) {
+            <div class="profile-movie-card">
+                <div class="movie-card-poster" (click)="goToMovie(movie.id)">
+                    @if (movie.imagePath) {
+                    <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="movie-card-img">
+                    } @else {
+                    <div class="movie-card-placeholder">
+                        <span>{{ getInitials(movie.title) }}</span>
+                    </div>
+                    }
+                    <div class="movie-card-overlay">
+                        <span class="movie-card-play">ⓘ</span>
+                    </div>
+                </div>
+                <div class="profile-movie-info">
+                    <h3 class="movie-card-title" (click)="goToMovie(movie.id)">{{ movie.title }}</h3>
+                    <div class="movie-card-meta">
+                        <span>{{ movie.releaseYear }}</span>
+                        <span class="movie-card-rating">★ {{ movie.rating }}</span>
+                    </div>
+                </div>
+                <button class="profile-remove-btn" (click)="removeFavorite(movie.id)" title="Retirer des favoris">
+                    ✕
+                </button>
+            </div>
+            }
+        </div>
+        }
+    </section>
+    }
+
+    <!-- ── LISTS TAB ─────────────────────────────────────────────────────── -->
+    @if (activeTab === 'lists') {
+    <section class="profile-section">
+        <div class="profile-section-header">
+            <h2 class="profile-section-title">Mes listes personnalisées</h2>
+            <button class="profile-btn-create" (click)="openCreateListModal()">+ Nouvelle liste</button>
+        </div>
+
+        @if (loadingLists) {
+        <div class="profile-loading">
+            <div class="home-loading-spinner"></div>
+        </div>
+        } @else if (userLists.length === 0) {
+        <div class="profile-empty">
+            <span class="profile-empty-icon">📋</span>
+            <h3>Aucune liste créée</h3>
+            <p>Organisez vos films en créant des listes personnalisées.</p>
+        </div>
+        } @else {
+        <div class="profile-lists">
+            @for (list of userLists; track list.id) {
+            <div class="profile-list-card" [class.expanded]="expandedListId === list.id">
+                <div class="profile-list-header" (click)="toggleListExpand(list.id!)">
+                    <div class="profile-list-info">
+                        <span class="profile-list-icon">{{ list.isPublic ? '🌐' : '🔒' }}</span>
+                        <div>
+                            <h3 class="profile-list-title">{{ list.title }}</h3>
+                            <span class="profile-list-count">{{ list.movies?.length || 0 }} film(s)</span>
+                        </div>
+                    </div>
+                    <div class="profile-list-actions">
+                        <button class="profile-list-btn profile-list-btn-add"
+                            (click)="openAddMovieModal(list.id!, $event)" title="Ajouter un film">
+                            +
+                        </button>
+                        <button class="profile-list-btn profile-list-btn-delete"
+                            (click)="deleteList(list.id!, $event)" title="Supprimer la liste">
+                            🗑️
+                        </button>
+                        <span class="profile-list-chevron">{{ expandedListId === list.id ? '▲' : '▼' }}</span>
+                    </div>
+                </div>
+
+                @if (expandedListId === list.id) {
+                <div class="profile-list-body">
+                    @if (list.movies && list.movies.length > 0) {
+                    <div class="profile-list-movies">
+                        @for (movie of list.movies; track movie.id) {
+                        <div class="profile-list-movie-item">
+                            <div class="profile-list-movie-poster" (click)="goToMovie(movie.id)">
+                                @if (movie.imagePath) {
+                                <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title">
+                                } @else {
+                                <div class="profile-list-movie-placeholder">{{ getInitials(movie.title) }}</div>
+                                }
+                            </div>
+                            <div class="profile-list-movie-info">
+                                <span class="profile-list-movie-title" (click)="goToMovie(movie.id)">
+                                    {{ movie.title }}
+                                </span>
+                                <span class="profile-list-movie-meta">
+                                    {{ movie.releaseYear }} · ★ {{ movie.rating }}
+                                </span>
+                            </div>
+                            <button class="profile-remove-btn-sm"
+                                (click)="removeMovieFromList(list.id!, movie.id)">✕</button>
+                        </div>
+                        }
+                    </div>
+                    } @else {
+                    <p class="profile-list-empty">
+                        Cette liste est vide. Ajoutez des films avec le bouton <strong>+</strong>.
+                    </p>
+                    }
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+    </section>
+    }
+
+    <!-- ── RECOMMENDATIONS TAB ───────────────────────────────────────────── -->
+    @if (activeTab === 'recommendations') {
+    <section class="profile-section">
+        <div class="profile-section-header">
+            <h2 class="profile-section-title">Recommandés pour vous</h2>
+        </div>
+
+        @if (loadingRecommendations) {
+        <div class="profile-loading">
+            <div class="home-loading-spinner"></div>
+        </div>
+        } @else if (recommendations.length === 0) {
+        <div class="profile-empty">
+            <span class="profile-empty-icon">🎬</span>
+            <h3>Pas encore de recommandations</h3>
+            <p>Ajoutez des favoris et notez des films pour débloquer des suggestions personnalisées.</p>
+        </div>
+        } @else {
+        <div class="profile-movie-grid">
+            @for (movie of recommendations; track movie.id) {
+            <div class="profile-movie-card">
+                <div class="movie-card-poster" (click)="goToMovie(movie.id)">
+                    @if (movie.imagePath) {
+                    <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="movie-card-img">
+                    } @else {
+                    <div class="movie-card-placeholder">
+                        <span>{{ getInitials(movie.title) }}</span>
+                    </div>
+                    }
+                    <div class="movie-card-overlay">
+                        <span class="movie-card-play">ⓘ</span>
+                    </div>
+                </div>
+                <div class="profile-movie-info">
+                    <h3 class="movie-card-title" (click)="goToMovie(movie.id)">{{ movie.title }}</h3>
+                    <div class="movie-card-meta">
+                        <span>{{ movie.releaseYear }}</span>
+                        <span class="movie-card-rating">★ {{ movie.rating }}</span>
+                        <span class="profile-reco-badge">Recommandé</span>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </section>
+    }
+</div>
+
+<!-- ═══ CREATE LIST MODAL ═══ -->
+@if (showCreateListModal) {
+<div class="profile-modal-overlay" (click)="closeCreateListModal()">
+    <div class="profile-modal" (click)="$event.stopPropagation()">
+        <div class="profile-modal-header">
+            <h3>Créer une nouvelle liste</h3>
+            <button class="profile-modal-close" (click)="closeCreateListModal()">✕</button>
+        </div>
+        <div class="profile-modal-body">
+            <div class="profile-form-group">
+                <label>Nom de la liste</label>
+                <input type="text" [(ngModel)]="newListTitle" placeholder="Ex: Films du week-end..."
+                    class="profile-input" (keydown.enter)="createList()">
+            </div>
+            <div class="profile-form-group profile-form-check">
+                <label class="profile-toggle">
+                    <input type="checkbox" [(ngModel)]="newListPublic">
+                    <span class="profile-toggle-slider"></span>
+                </label>
+                <span class="profile-toggle-label">Liste publique</span>
+            </div>
+        </div>
+        <div class="profile-modal-footer">
+            <button class="profile-btn-secondary" (click)="closeCreateListModal()">Annuler</button>
+            <button class="profile-btn-primary" (click)="createList()" [disabled]="!newListTitle.trim()">
+                Créer
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- ═══ ADD MOVIE MODAL ═══ -->
+@if (showAddMovieModal) {
+<div class="profile-modal-overlay" (click)="closeAddMovieModal()">
+    <div class="profile-modal profile-modal-lg" (click)="$event.stopPropagation()">
+        <div class="profile-modal-header">
+            <h3>Ajouter un film</h3>
+            <button class="profile-modal-close" (click)="closeAddMovieModal()">✕</button>
+        </div>
+        <div class="profile-modal-body">
+            <div class="profile-search-bar">
+                <input type="text" [(ngModel)]="movieSearchQuery" placeholder="Rechercher un film..."
+                    class="profile-input" (keydown.enter)="searchMovies()">
+                <button class="profile-btn-primary" (click)="searchMovies()"
+                    [disabled]="movieSearchQuery.trim().length < 2">
+                    🔍
+                </button>
+            </div>
+
+            @if (searchingMovies) {
+            <div class="profile-loading-sm">
+                <div class="home-loading-spinner"></div>
+            </div>
+            }
+
+            @if (movieSearchResults.length > 0) {
+            <div class="profile-search-results">
+                @for (movie of movieSearchResults; track movie.id) {
+                <div class="profile-search-result" (click)="addMovieToList(movie)">
+                    <div class="profile-search-poster">
+                        @if (movie.imagePath) {
+                        <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title">
+                        } @else {
+                        <div class="profile-search-placeholder">{{ getInitials(movie.title) }}</div>
+                        }
+                    </div>
+                    <div class="profile-search-info">
+                        <strong>{{ movie.title }}</strong>
+                        <span>{{ movie.releaseYear }} · {{ movie.categoryName }} · ★ {{ movie.rating }}</span>
+                    </div>
+                    <span class="profile-search-add">+ Ajouter</span>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}

@@ -36,3 +36,38 @@ export interface MovieDTO {
     reviewCount: number;
     favoriteCount: number;
 }
+
+/** Review entity from backend */
+export interface Review {
+    id?: number;
+    rating: number;
+    comment?: string;
+    createdAt?: string;
+    user?: { id: number; name: string; email: string };
+    movie?: { id: number; title: string };
+}
+
+/** Favorite entity from backend */
+export interface Favorite {
+    id?: number;
+    user?: { id: number; name: string; email: string };
+    movie?: { id: number; title: string };
+    createdAt?: string;
+}
+
+/** UserList entity from backend */
+export interface UserList {
+    id?: number;
+    title: string;
+    isPublic?: boolean;
+    user?: { id: number; name: string; email: string };
+    movies?: ListMovie[];
+}
+
+/** ListMovie entity from backend */
+export interface ListMovie {
+    id?: number;
+    addedAt?: string;
+    list?: { id: number; title: string };
+    movie?: { id: number; title: string };
+}

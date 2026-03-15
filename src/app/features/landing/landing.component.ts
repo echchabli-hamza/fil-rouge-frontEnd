@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { MovieService } from '../../core/services/movie.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -17,6 +18,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     private movieService = inject(MovieService);
     private categoryService = inject(CategoryService);
     private cdr = inject(ChangeDetectorRef);
+    private router = inject(Router);
 
     readonly apiUrl = environment.apiUrl;
 
@@ -132,5 +134,9 @@ export class LandingComponent implements OnInit, OnDestroy {
     private restartTimer(): void {
         clearInterval(this.heroTimer);
         this.startHeroTimer();
+    }
+
+    goToMovie(id: number): void {
+        this.router.navigate(['/movie', id]);
     }
 }

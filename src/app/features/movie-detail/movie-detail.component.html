@@ -1,0 +1,202 @@
+@if (loading) {
+<div class="detail-loading">
+    <div class="home-loading-spinner"></div>
+</div>
+} @else if (movie) {
+
+<!-- ═══ HERO BANNER ═══ -->
+<section class="detail-hero">
+    <div class="detail-hero-bg"
+        [style.background-image]="movie.imagePath ? 'url(' + getImageUrl(movie.imagePath) + ')' : ''">
+    </div>
+    <div class="detail-hero-overlay"></div>
+
+    <div class="detail-hero-content">
+        <div class="detail-poster">
+            @if (movie.imagePath) {
+            <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="detail-poster-img">
+            } @else {
+            <div class="detail-poster-placeholder">
+                <span>{{ getInitials(movie.title) }}</span>
+            </div>
+            }
+        </div>
+
+        <div class="detail-info">
+            <span class="detail-category">{{ movie.categoryName }}</span>
+            <h1 class="detail-title">{{ movie.title }}</h1>
+
+            <div class="detail-meta">
+                <span class="detail-meta-item">📅 {{ movie.releaseYear }}</span>
+                <span class="detail-meta-item">🎬 {{ movie.director }}</span>
+                <span class="detail-meta-item">⭐ {{ movie.rating }}/5</span>
+                <span class="detail-meta-item">💬 {{ reviews.length }} avis</span>
+                <span class="detail-meta-item">❤️ {{ movie.favoriteCount }} favoris</span>
+            </div>
+
+            <p class="detail-synopsis">{{ movie.synopsis }}</p>
+
+            <div class="detail-actors">
+                <strong>Acteurs :</strong> {{ movie.actors }}
+            </div>
+
+            <div class="detail-actions">
+                <button class="detail-btn detail-btn-fav" [class.active]="isFavorite" (click)="toggleFavorite()"
+                    [disabled]="!isLoggedIn">
+                    {{ isFavorite ? '❤️ Favori' : '🤍 Ajouter aux favoris' }}
+                </button>
+                <button class="detail-btn detail-btn-list" (click)="openListModal()" [disabled]="!isLoggedIn">
+                    📋 Ajouter à une liste
+                </button>
+            </div>
+
+            @if (!isLoggedIn) {
+            <p class="detail-login-hint">
+                <a routerLink="/login">Connectez-vous</a> pour noter, commenter et ajouter aux favoris.
+            </p>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ═══ REVIEWS SECTION ═══ -->
+<section class="detail-section">
+    <h2 class="detail-section-title">Avis et notes</h2>
+
+    <!-- Average rating -->
+    <div class="detail-rating-summary">
+        <div class="detail-rating-big">
+            <span class="detail-rating-number">{{ getAverageRating() }}</span>
+            <span class="detail-rating-max">/5</span>
+        </div>
+        <div class="detail-rating-stars">
+            @for (star of getStarArray(); track star) {
+            <span class="detail-star" [class.filled]="star <= getAverageRating()">★</span>
+            }
+        </div>
+        <span class="detail-rating-count">{{ reviews.length }} avis</span>
+    </div>
+
+    <!-- Review form (only if logged in and hasn't reviewed yet, or is editing) -->
+    @if (isLoggedIn && (!userReview || editingReview)) {
+    <div class="detail-review-form">
+        <h3>{{ editingReview ? 'Modifier votre avis' : 'Donner votre avis' }}</h3>
+
+        <div class="detail-star-picker">
+            <span>Votre note :</span>
+            <div class="detail-star-row">
+                @for (star of getStarArray(); track star) {
+                <button class="detail-star-btn"
+                    [class.filled]="star <= (hoverRating || newRating)"
+                    (mouseenter)="hoverRating = star"
+                    (mouseleave)="hoverRating = 0"
+                    (click)="setRating(star)">★</button>
+                }
+            </div>
+            <span class="detail-star-label">{{ newRating > 0 ? newRating + '/5' : '' }}</span>
+        </div>
+
+        <textarea class="detail-review-textarea" [(ngModel)]="newComment"
+            placeholder="Votre commentaire (optionnel)..." rows="4"></textarea>
+
+        <div class="detail-review-actions">
+            <button class="detail-btn detail-btn-submit" (click)="submitReview()"
+                [disabled]="newRating === 0 || submittingReview">
+                {{ submittingReview ? 'Envoi...' : (editingReview ? 'Mettre à jour' : 'Publier') }}
+            </button>
+            @if (editingReview) {
+            <button class="detail-btn detail-btn-cancel" (click)="editingReview = false">Annuler</button>
+            }
+        </div>
+    </div>
+    }
+
+    <!-- User's existing review -->
+    @if (userReview && !editingReview) {
+    <div class="detail-user-review">
+        <div class="detail-review-header">
+            <strong>Votre avis</strong>
+            <div class="detail-review-stars">
+                @for (star of getStarArray(); track star) {
+                <span class="detail-star" [class.filled]="star <= userReview.rating">★</span>
+                }
+            </div>
+        </div>
+        @if (userReview.comment) {
+        <p class="detail-review-comment">{{ userReview.comment }}</p>
+        }
+        <div class="detail-review-user-actions">
+            <button class="detail-btn-sm" (click)="editReview()">✏️ Modifier</button>
+            <button class="detail-btn-sm detail-btn-danger" (click)="deleteReview()">🗑️ Supprimer</button>
+        </div>
+    </div>
+    }
+
+    <!-- All reviews -->
+    <div class="detail-reviews-list">
+        @for (review of reviews; track review.id) {
+        @if (review.user?.email !== currentUser?.email) {
+        <div class="detail-review-card">
+            <div class="detail-review-header">
+                <div class="detail-review-user">
+                    <div class="detail-review-avatar">{{ review.user?.name?.charAt(0) || '?' }}</div>
+                    <div>
+                        <strong>{{ review.user?.name || 'Anonyme' }}</strong>
+                        <span class="detail-review-date">{{ formatDate(review.createdAt) }}</span>
+                    </div>
+                </div>
+                <div class="detail-review-stars">
+                    @for (star of getStarArray(); track star) {
+                    <span class="detail-star sm" [class.filled]="star <= review.rating">★</span>
+                    }
+                </div>
+            </div>
+            @if (review.comment) {
+            <p class="detail-review-comment">{{ review.comment }}</p>
+            }
+        </div>
+        }
+        } @empty {
+        <p class="detail-no-reviews">Aucun avis pour le moment. Soyez le premier !</p>
+        }
+    </div>
+</section>
+
+<!-- ═══ LIST MODAL ═══ -->
+@if (showListModal) {
+<div class="detail-modal-overlay" (click)="closeListModal()">
+    <div class="detail-modal" (click)="$event.stopPropagation()">
+        <div class="detail-modal-header">
+            <h3>Ajouter à une liste</h3>
+            <button class="detail-modal-close" (click)="closeListModal()">✕</button>
+        </div>
+        <div class="detail-modal-body">
+            @if (userLists.length > 0) {
+            <div class="detail-list-options">
+                @for (list of userLists; track list.id) {
+                <button class="detail-list-option" (click)="addToList(list.id!)">
+                    📋 {{ list.title }}
+                </button>
+                }
+            </div>
+            } @else {
+            <p class="detail-no-lists">Vous n'avez pas encore de liste.</p>
+            }
+
+            <div class="detail-create-list">
+                <input type="text" [(ngModel)]="newListName" placeholder="Nouvelle liste..."
+                    class="detail-list-input" (keydown.enter)="createAndAdd()">
+                <button class="detail-btn detail-btn-submit" (click)="createAndAdd()"
+                    [disabled]="!newListName.trim()">+ Créer et ajouter</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+} @else {
+<div class="detail-not-found">
+    <h2>Film introuvable</h2>
+    <a routerLink="/" class="detail-btn">← Retour à l'accueil</a>
+</div>
+}
