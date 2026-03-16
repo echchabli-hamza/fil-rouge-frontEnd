@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MovieService } from '../../core/services/movie.service';
-import { ReviewService } from '../../core/services/review.service';
+import { CommentService, Comment } from '../../core/services/comment.service';
+import { RatingService, Rating } from '../../core/services/rating.service';
 import { FavoriteService } from '../../core/services/favorite.service';
 import { UserListService } from '../../core/services/user-list.service';
 import { AuthService } from '../../core/services/auth.service';
-import { MovieDTO, Review, Favorite, UserList } from '../../core/models/admin.models';
+import { MovieDTO, UserList } from '../../core/models/admin.models';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -19,7 +20,8 @@ import { environment } from '../../../environments/environment';
 export class MovieDetailComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private movieService = inject(MovieService);
-    private reviewService = inject(ReviewService);
+    private commentService = inject(CommentService);
+    private ratingService = inject(RatingService);
     private favoriteService = inject(FavoriteService);
     private userListService = inject(UserListService);
     private auth = inject(AuthService);
@@ -27,42 +29,55 @@ export class MovieDetailComponent implements OnInit {
 
     readonly apiUrl = environment.apiUrl;
 
+    // ── Movie ──────────────────────────────────────────────────────────────
     movie: MovieDTO | null = null;
-    reviews: Review[] = [];
-    userLists: UserList[] = [];
-    isFavorite = false;
     loading = true;
 
-    // Review form
-    newRating = 0;
-    newComment = '';
-    hoverRating = 0;
-    submittingReview = false;
-    userReview: Review | null = null;
-    editingReview = false;
+    // ── Favorite ───────────────────────────────────────────────────────────
+    isFavorite = false;
 
-    // List modal
+    // ── Rating ─────────────────────────────────────────────────────────────
+    ratings: Rating[] = [];
+    userRating: Rating | null = null;
+    hoverStar = 0;
+    selectedStar = 0;
+    submittingRating = false;
+
+    // ── Comments ───────────────────────────────────────────────────────────
+    comments: Comment[] = [];
+    loadingComments = false;
+    newCommentText = '';
+    submittingComment = false;
+    editingComment: Comment | null = null;
+    editCommentText = '';
+
+    // ── List modal ─────────────────────────────────────────────────────────
+    userLists: UserList[] = [];
     showListModal = false;
     newListName = '';
 
-    get isLoggedIn(): boolean {
-        return this.auth.isLoggedIn();
-    }
+    get isLoggedIn(): boolean { return this.auth.isLoggedIn(); }
+    get currentUser() { return this.auth.getUser(); }
 
-    get currentUser() {
-        return this.auth.getUser();
+    get averageRating(): number {
+        if (!this.ratings.length) return 0;
+        const sum = this.ratings.reduce((a, r) => a + (r.rating ?? 0), 0);
+        return Math.round((sum / this.ratings.length) * 10) / 10;
     }
 
     ngOnInit(): void {
         this.route.params.subscribe(params => {
             const id = +params['id'];
             this.loadMovie(id);
-            this.loadReviews(id);
+            this.loadRatings(id);
+            this.loadComments(id);
             if (this.isLoggedIn) {
                 this.loadUserData(id);
             }
         });
     }
+
+    // ── Loaders ────────────────────────────────────────────────────────────
 
     private loadMovie(id: number): void {
         this.movieService.getPublicOne(id).subscribe({
@@ -71,43 +86,193 @@ export class MovieDetailComponent implements OnInit {
                 this.loading = false;
                 this.cdr.detectChanges();
             },
-            error: (e) => {
-                console.error('Error loading movie', e);
-                this.loading = false;
+            error: () => { this.loading = false; this.cdr.detectChanges(); }
+        });
+    }
+
+    private loadRatings(movieId: number): void {
+        this.ratingService.getByMovie(movieId).subscribe({
+            next: (ratings) => {
+                this.ratings = ratings;
+                if (this.currentUser) {
+                    this.userRating = ratings.find(r => r.user?.email === this.currentUser!.email) ?? null;
+                    this.selectedStar = this.userRating?.rating ?? 0;
+                }
                 this.cdr.detectChanges();
             }
         });
     }
 
-    private loadReviews(movieId: number): void {
-        this.reviewService.getByMovie(movieId).subscribe({
-            next: (reviews) => {
-                this.reviews = reviews;
-                // Check if current user already reviewed
-                if (this.currentUser) {
-                    this.userReview = reviews.find(r => r.user?.email === this.currentUser!.email) || null;
-                    if (this.userReview) {
-                        this.newRating = this.userReview.rating;
-                        this.newComment = this.userReview.comment || '';
-                    }
-                }
+    private loadComments(movieId: number): void {
+        this.loadingComments = true;
+        this.commentService.getByMovie(movieId).subscribe({
+            next: (comments) => {
+                this.comments = comments;
+                this.loadingComments = false;
                 this.cdr.detectChanges();
             },
-            error: (e) => console.error('Error loading reviews', e)
+            error: () => { this.loadingComments = false; this.cdr.detectChanges(); }
         });
     }
 
     private loadUserData(movieId: number): void {
-        // Load user's favorites to check if this movie is favorited
-        // We need the userId — for now we'll parse from the token or check by listing
-        this.userListService.getAllLists().subscribe({
-            next: (lists) => {
-                this.userLists = lists;
+        const userId = this.currentUser?.id;
+        if (!userId) return;
+
+        this.favoriteService.getByUser(userId).subscribe({
+            next: (favorites) => {
+                this.isFavorite = favorites.some(f => f.movie?.id === movieId);
                 this.cdr.detectChanges();
             },
-            error: () => {}
+            error: () => { }
+        });
+
+        this.userListService.getListsByUser(userId).subscribe({
+            next: (lists) => { this.userLists = lists; this.cdr.detectChanges(); },
+            error: () => { }
         });
     }
+
+    // ── Favorites ──────────────────────────────────────────────────────────
+
+    toggleFavorite(): void {
+        if (!this.movie || !this.currentUser?.id) return;
+        const userId = this.currentUser.id;
+        const movieId = this.movie.id;
+
+        if (this.isFavorite) {
+            this.isFavorite = false;
+            this.cdr.detectChanges();
+            this.favoriteService.remove(userId, movieId).subscribe({
+                error: () => { this.isFavorite = true; this.cdr.detectChanges(); }
+            });
+        } else {
+            this.isFavorite = true;
+            this.cdr.detectChanges();
+            this.favoriteService.add(userId, movieId).subscribe({
+                error: () => { this.isFavorite = false; this.cdr.detectChanges(); }
+            });
+        }
+    }
+
+    // ── Rating ─────────────────────────────────────────────────────────────
+
+    submitRating(star: number): void {
+        if (!this.movie || !this.isLoggedIn || this.submittingRating) return;
+        this.submittingRating = true;
+        this.selectedStar = star;
+        this.cdr.detectChanges();
+
+        this.ratingService.upsert(this.movie.id, star).subscribe({
+            next: (saved) => {
+                this.userRating = saved;
+                this.submittingRating = false;
+                this.loadRatings(this.movie!.id);
+            },
+            error: () => { this.submittingRating = false; this.cdr.detectChanges(); }
+        });
+    }
+
+    deleteRating(): void {
+        if (!this.userRating?.id) return;
+        this.ratingService.delete(this.userRating.id).subscribe({
+            next: () => {
+                this.userRating = null;
+                this.selectedStar = 0;
+                this.loadRatings(this.movie!.id);
+            }
+        });
+    }
+
+    // ── Comments ───────────────────────────────────────────────────────────
+
+    submitComment(): void {
+        if (!this.movie || !this.newCommentText.trim() || this.submittingComment) return;
+        this.submittingComment = true;
+
+        this.commentService.create(this.movie.id, this.newCommentText.trim()).subscribe({
+            next: (created) => {
+                this.comments = [created, ...this.comments];
+                this.newCommentText = '';
+                this.submittingComment = false;
+                this.cdr.detectChanges();
+            },
+            error: () => { this.submittingComment = false; this.cdr.detectChanges(); }
+        });
+    }
+
+    startEditComment(comment: Comment): void {
+        this.editingComment = comment;
+        this.editCommentText = comment.text ?? '';
+    }
+
+    cancelEditComment(): void {
+        this.editingComment = null;
+        this.editCommentText = '';
+    }
+
+    saveEditComment(): void {
+        if (!this.editingComment?.id || !this.editCommentText.trim()) return;
+        this.commentService.update(this.editingComment.id, this.editCommentText.trim()).subscribe({
+            next: (updated) => {
+                const idx = this.comments.findIndex(c => c.id === updated.id);
+                if (idx !== -1) this.comments[idx] = updated;
+                this.comments = [...this.comments];
+                this.cancelEditComment();
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    deleteComment(commentId: number): void {
+        this.commentService.delete(commentId).subscribe({
+            next: () => {
+                this.comments = this.comments.filter(c => c.id !== commentId);
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    isMyComment(comment: Comment): boolean {
+        return !!this.currentUser && comment.user?.email === this.currentUser.email;
+    }
+
+    // ── Lists ──────────────────────────────────────────────────────────────
+
+    openListModal(): void { this.showListModal = true; }
+
+    closeListModal(): void {
+        this.showListModal = false;
+        this.newListName = '';
+    }
+
+    addToList(listId: number): void {
+        if (!this.movie) return;
+        this.userListService.addMovieToList(listId, this.movie.id).subscribe({
+            next: () => this.closeListModal(),
+            error: (e) => console.error('Error adding to list', e)
+        });
+    }
+
+    createAndAdd(): void {
+        if (!this.newListName.trim() || !this.movie || !this.currentUser) return;
+        const newList: UserList = {
+            title: this.newListName.trim(),
+            isPublic: false,
+            user: { id: this.currentUser.id, name: this.currentUser.name, email: this.currentUser.email }
+        };
+        this.userListService.createList(newList).subscribe({
+            next: (created) => {
+                this.userLists.push(created);
+                this.addToList(created.id!);
+            },
+            error: (e) => console.error('Error creating list', e)
+        });
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+
+    getStarArray(): number[] { return [1, 2, 3, 4, 5]; }
 
     getImageUrl(path: string | null): string {
         if (!path) return '';
@@ -118,124 +283,10 @@ export class MovieDetailComponent implements OnInit {
         return title.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
     }
 
-    // ── Favorites ─────────────────────────────────────────────────────────
-
-    toggleFavorite(): void {
-        if (!this.movie) return;
-        this.isFavorite = !this.isFavorite;
-        this.cdr.detectChanges();
-        // Note: actual API call requires userId which we don't have in the JWT user object.
-        // For now we just toggle the UI state.
-    }
-
-    // ── Reviews ───────────────────────────────────────────────────────────
-
-    setRating(star: number): void {
-        this.newRating = star;
-    }
-
-    submitReview(): void {
-        if (!this.movie || this.newRating === 0) return;
-        this.submittingReview = true;
-
-        if (this.userReview && this.editingReview) {
-            this.reviewService.update(this.userReview.id!, this.newRating, this.newComment).subscribe({
-                next: () => {
-                    this.submittingReview = false;
-                    this.editingReview = false;
-                    this.loadReviews(this.movie!.id);
-                },
-                error: (e) => {
-                    console.error('Error updating review', e);
-                    this.submittingReview = false;
-                    this.cdr.detectChanges();
-                }
-            });
-        } else {
-            this.reviewService.create(this.movie.id, this.newRating, this.newComment || undefined).subscribe({
-                next: () => {
-                    this.submittingReview = false;
-                    this.loadReviews(this.movie!.id);
-                },
-                error: (e) => {
-                    console.error('Error creating review', e);
-                    this.submittingReview = false;
-                    this.cdr.detectChanges();
-                }
-            });
-        }
-    }
-
-    editReview(): void {
-        if (this.userReview) {
-            this.editingReview = true;
-            this.newRating = this.userReview.rating;
-            this.newComment = this.userReview.comment || '';
-        }
-    }
-
-    deleteReview(): void {
-        if (!this.userReview) return;
-        this.reviewService.delete(this.userReview.id!).subscribe({
-            next: () => {
-                this.userReview = null;
-                this.newRating = 0;
-                this.newComment = '';
-                this.editingReview = false;
-                this.loadReviews(this.movie!.id);
-            },
-            error: (e) => console.error('Error deleting review', e)
-        });
-    }
-
-    // ── Lists ─────────────────────────────────────────────────────────────
-
-    openListModal(): void {
-        this.showListModal = true;
-    }
-
-    closeListModal(): void {
-        this.showListModal = false;
-        this.newListName = '';
-    }
-
-    addToList(listId: number): void {
-        if (!this.movie) return;
-        this.userListService.addMovieToList(listId, this.movie.id).subscribe({
-            next: () => {
-                this.closeListModal();
-            },
-            error: (e) => console.error('Error adding to list', e)
-        });
-    }
-
-    createAndAdd(): void {
-        if (!this.newListName.trim() || !this.movie) return;
-        const newList: UserList = { title: this.newListName.trim(), isPublic: false };
-        this.userListService.createList(newList).subscribe({
-            next: (created) => {
-                this.userLists.push(created);
-                this.addToList(created.id!);
-            },
-            error: (e) => console.error('Error creating list', e)
-        });
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────
-
-    getStarArray(): number[] {
-        return [1, 2, 3, 4, 5];
-    }
-
     formatDate(dateStr?: string): string {
         if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    }
-
-    getAverageRating(): number {
-        if (this.reviews.length === 0) return 0;
-        const sum = this.reviews.reduce((acc, r) => acc + r.rating, 0);
-        return Math.round((sum / this.reviews.length) * 10) / 10;
+        return new Date(dateStr).toLocaleDateString('fr-FR', {
+            day: 'numeric', month: 'long', year: 'numeric'
+        });
     }
 }

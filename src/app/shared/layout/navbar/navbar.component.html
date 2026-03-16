@@ -7,19 +7,22 @@
     </button>
     <div class="navbar-menu" [class.navbar-menu-open]="menuOpen">
         @if (currentUser$ | async; as user) {
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="navbar-link">Accueil</a>
-            @if ((user?.role ?? '').toLowerCase() === 'admin') {
-                <a routerLink="/dash" routerLinkActive="active" class="navbar-link">Tableau de bord</a>
-            }
-            <a routerLink="/profile" routerLinkActive="active" class="navbar-link">Profil</a>
-            <a routerLink="/settings" routerLinkActive="active" class="navbar-link">Paramètres</a>
-            <div class="navbar-user">
-                <span class="navbar-avatar">{{ getUserInitials(user?.name ?? '') }}</span>
-                <button class="navbar-logout" (click)="logout()">Déconnexion</button>
-            </div>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+            class="navbar-link">Accueil</a>
+        <a routerLink="/search" routerLinkActive="active" class="navbar-link">🔍 Rechercher</a>
+        @if ((user?.role ?? '').toLowerCase() === 'admin') {
+        <a routerLink="/dash" routerLinkActive="active" class="navbar-link">Tableau de bord</a>
+        }
+        <a routerLink="/profile" routerLinkActive="active" class="navbar-link">Profil</a>
+        <a routerLink="/settings" routerLinkActive="active" class="navbar-link">Paramètres</a>
+        <div class="navbar-user">
+            <span class="navbar-avatar">{{ getUserInitials(user?.name ?? '') }}</span>
+            <button class="navbar-logout" (click)="logout()">Déconnexion</button>
+        </div>
         } @else {
-            <a routerLink="/login" class="navbar-link">Connexion</a>
-            <a routerLink="/register" class="btn-primary btn-nav">S'inscrire</a>
+        <a routerLink="/search" routerLinkActive="active" class="navbar-link">🔍 Rechercher</a>
+        <a routerLink="/login" class="navbar-link">Connexion</a>
+        <a routerLink="/register" class="btn-primary btn-nav">S'inscrire</a>
         }
     </div>
 </nav>

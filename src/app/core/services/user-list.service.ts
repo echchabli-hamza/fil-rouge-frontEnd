@@ -9,7 +9,7 @@ export class UserListService {
     private listBase = `${environment.apiUrl}/user/lists`;
     private listMovieBase = `${environment.apiUrl}/user/list-movies`;
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     // ── User Lists ────────────────────────────────────────────────────────
 
@@ -21,6 +21,11 @@ export class UserListService {
     /** GET /user/lists */
     getAllLists(): Observable<UserList[]> {
         return this.http.get<UserList[]>(this.listBase);
+    }
+
+    /** GET /user/lists/user/{userId} */
+    getListsByUser(userId: number): Observable<UserList[]> {
+        return this.http.get<UserList[]>(`${this.listBase}/user/${userId}`);
     }
 
     /** GET /user/lists/{id} */

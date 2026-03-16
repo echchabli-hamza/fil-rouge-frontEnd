@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { FavoriteService } from '../../core/services/favorite.service';
 import { UserListService } from '../../core/services/user-list.service';
@@ -39,6 +40,7 @@ export class ProfileComponent implements OnInit {
 
     // User info
     get user() { return this.auth.getUser(); }
+    private get userId(): number { return this.user!.id; }
 
     // Favorites
     favorites: MovieDTO[] = [];
@@ -77,14 +79,41 @@ export class ProfileComponent implements OnInit {
 
     private loadFavorites(): void {
         this.loadingFavorites = true;
-        // TODO: replace with real endpoint when ready
-        // Placeholder: use trending movies as fake favorites
-        this.movieService.getTrending().subscribe({
-            next: (movies) => {
-                this.favorites = movies.slice(0, 6);
-                this.loadingFavorites = false;
-                this.loading = false;
-                this.cdr.detectChanges();
+        this.favoriteService.getByUser(this.userId).subscribe({
+            next: (favorites) => {
+                if (favorites.length === 0) {
+                    this.favorites = [];
+                    this.loadingFavorites = false;
+                    this.loading = false;
+                    this.cdr.detectChanges();
+                    return;
+                }
+                // Fetch full MovieDTO for each favorite
+                const movieRequests = favorites
+                    .filter(f => f.movie?.id)
+                    .map(f => this.movieService.getPublicOne(f.movie!.id!));
+
+                if (movieRequests.length === 0) {
+                    this.favorites = [];
+                    this.loadingFavorites = false;
+                    this.loading = false;
+                    this.cdr.detectChanges();
+                    return;
+                }
+
+                forkJoin(movieRequests).subscribe({
+                    next: (movies) => {
+                        this.favorites = movies;
+                        this.loadingFavorites = false;
+                        this.loading = false;
+                        this.cdr.detectChanges();
+                    },
+                    error: () => {
+                        this.loadingFavorites = false;
+                        this.loading = false;
+                        this.cdr.detectChanges();
+                    }
+                });
             },
             error: () => {
                 this.loadingFavorites = false;
@@ -95,33 +124,35 @@ export class ProfileComponent implements OnInit {
     }
 
     removeFavorite(movieId: number): void {
-        // TODO: call favoriteService.remove() with real userId
-        this.favorites = this.favorites.filter(m => m.id !== movieId);
-        this.cdr.detectChanges();
+        this.favoriteService.remove(this.userId, movieId).subscribe({
+            next: () => {
+                this.favorites = this.favorites.filter(m => m.id !== movieId);
+                this.cdr.detectChanges();
+            },
+            error: (e) => console.error('Error removing favorite', e)
+        });
     }
 
     // ── Lists ──────────────────────────────────────────────────────────────
 
     private loadLists(): void {
         this.loadingLists = true;
-        // TODO: replace with real endpoint
-        // Placeholder: fake lists
-        this.userLists = [
-            {
-                id: 1,
-                title: 'À regarder ce week-end',
-                isPublic: false,
-                movies: [],
+        this.userListService.getListsByUser(this.userId).subscribe({
+            next: (lists) => {
+                this.userLists = lists.map(l => ({
+                    id: l.id,
+                    title: l.title,
+                    isPublic: l.isPublic,
+                    movies: [],
+                }));
+                this.loadingLists = false;
+                this.cdr.detectChanges();
             },
-            {
-                id: 2,
-                title: 'Films cultes',
-                isPublic: true,
-                movies: [],
-            },
-        ];
-        this.loadingLists = false;
-        this.cdr.detectChanges();
+            error: () => {
+                this.loadingLists = false;
+                this.cdr.detectChanges();
+            }
+        });
     }
 
     toggleListExpand(listId: number): void {
@@ -129,7 +160,27 @@ export class ProfileComponent implements OnInit {
             this.expandedListId = null;
         } else {
             this.expandedListId = listId;
-            // TODO: load movies for this list via userListService.getMoviesInList(listId)
+            // Load movies for this list
+            const list = this.userLists.find(l => l.id === listId);
+            if (list && (!list.movies || list.movies.length === 0)) {
+                this.userListService.getMoviesInList(listId).subscribe({
+                    next: (listMovies) => {
+                        if (listMovies.length === 0) return;
+                        const movieRequests = listMovies
+                            .filter(lm => lm.movie?.id)
+                            .map(lm => this.movieService.getPublicOne(lm.movie!.id!));
+
+                        if (movieRequests.length === 0) return;
+
+                        forkJoin(movieRequests).subscribe({
+                            next: (movies) => {
+                                list.movies = movies;
+                                this.cdr.detectChanges();
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 
@@ -145,24 +196,36 @@ export class ProfileComponent implements OnInit {
 
     createList(): void {
         if (!this.newListTitle.trim()) return;
-        // TODO: call userListService.createList()
-        const newList: ProfileList = {
-            id: Date.now(), // placeholder id
+        const newList: UserList = {
             title: this.newListTitle.trim(),
             isPublic: this.newListPublic,
-            movies: [],
+            user: { id: this.userId, name: this.user!.name, email: this.user!.email },
         };
-        this.userLists = [...this.userLists, newList];
-        this.closeCreateListModal();
-        this.cdr.detectChanges();
+        this.userListService.createList(newList).subscribe({
+            next: (created) => {
+                this.userLists = [...this.userLists, {
+                    id: created.id,
+                    title: created.title,
+                    isPublic: created.isPublic,
+                    movies: [],
+                }];
+                this.closeCreateListModal();
+                this.cdr.detectChanges();
+            },
+            error: (e) => console.error('Error creating list', e)
+        });
     }
 
     deleteList(listId: number, event: Event): void {
         event.stopPropagation();
-        // TODO: call userListService.deleteList()
-        this.userLists = this.userLists.filter(l => l.id !== listId);
-        if (this.expandedListId === listId) this.expandedListId = null;
-        this.cdr.detectChanges();
+        this.userListService.deleteList(listId).subscribe({
+            next: () => {
+                this.userLists = this.userLists.filter(l => l.id !== listId);
+                if (this.expandedListId === listId) this.expandedListId = null;
+                this.cdr.detectChanges();
+            },
+            error: (e) => console.error('Error deleting list', e)
+        });
     }
 
     // Add movie to list
@@ -197,32 +260,41 @@ export class ProfileComponent implements OnInit {
 
     addMovieToList(movie: MovieDTO): void {
         if (!this.addMovieTargetListId) return;
-        // TODO: call userListService.addMovieToList()
-        const list = this.userLists.find(l => l.id === this.addMovieTargetListId);
-        if (list) {
-            if (!list.movies) list.movies = [];
-            if (!list.movies.find(m => m.id === movie.id)) {
-                list.movies = [...list.movies, movie];
-            }
-        }
-        this.closeAddMovieModal();
-        this.cdr.detectChanges();
+        const listId = this.addMovieTargetListId;
+        this.userListService.addMovieToList(listId, movie.id).subscribe({
+            next: () => {
+                const list = this.userLists.find(l => l.id === listId);
+                if (list) {
+                    if (!list.movies) list.movies = [];
+                    if (!list.movies.find(m => m.id === movie.id)) {
+                        list.movies = [...list.movies, movie];
+                    }
+                }
+                this.closeAddMovieModal();
+                this.cdr.detectChanges();
+            },
+            error: (e) => console.error('Error adding movie to list', e)
+        });
     }
 
     removeMovieFromList(listId: number, movieId: number): void {
-        // TODO: call userListService.removeMovieFromList()
-        const list = this.userLists.find(l => l.id === listId);
-        if (list && list.movies) {
-            list.movies = list.movies.filter(m => m.id !== movieId);
-        }
-        this.cdr.detectChanges();
+        this.userListService.removeMovieFromList(listId, movieId).subscribe({
+            next: () => {
+                const list = this.userLists.find(l => l.id === listId);
+                if (list && list.movies) {
+                    list.movies = list.movies.filter(m => m.id !== movieId);
+                }
+                this.cdr.detectChanges();
+            },
+            error: (e) => console.error('Error removing movie from list', e)
+        });
     }
 
     // ── Recommendations ────────────────────────────────────────────────────
 
     private loadRecommendations(): void {
         this.loadingRecommendations = true;
-        // TODO: replace with real recommendation endpoint
+        // TODO: replace with real recommendation endpoint when available
         this.movieService.getTopRated().subscribe({
             next: (movies) => {
                 this.recommendations = movies.slice(0, 10);

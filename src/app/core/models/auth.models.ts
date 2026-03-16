@@ -13,11 +13,13 @@ export interface RegisterRequest {
 export interface LoginResponse {
   token: string;
   role: string;
+  id: number;
   name?: string;
   email?: string;
 }
 
 export interface User {
+  id: number;
   name: string;
   email: string;
   role: string;

@@ -58,6 +58,7 @@ export class AuthService {
     private handleAuthResponse(res: LoginResponse, email: string, remember = true): void {
         const storage = remember ? localStorage : sessionStorage;
         const user: User = {
+            id: res.id,
             name: res.name ?? email.split('@')[0],
             email: res.email ?? email,
             role: res.role,

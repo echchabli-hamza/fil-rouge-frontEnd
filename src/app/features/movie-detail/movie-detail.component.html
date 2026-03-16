@@ -29,8 +29,13 @@
             <div class="detail-meta">
                 <span class="detail-meta-item">📅 {{ movie.releaseYear }}</span>
                 <span class="detail-meta-item">🎬 {{ movie.director }}</span>
-                <span class="detail-meta-item">⭐ {{ movie.rating }}/5</span>
-                <span class="detail-meta-item">💬 {{ reviews.length }} avis</span>
+                <span class="detail-meta-item">
+                    ⭐ {{ averageRating }}/5
+                    <span class="detail-meta-count">({{ ratings.length }} note{{ ratings.length !== 1 ? 's' : ''
+                        }})</span>
+                </span>
+                <span class="detail-meta-item">💬 {{ comments.length }} commentaire{{ comments.length !== 1 ? 's' : ''
+                    }}</span>
                 <span class="detail-meta-item">❤️ {{ movie.favoriteCount }} favoris</span>
             </div>
 
@@ -59,105 +64,106 @@
     </div>
 </section>
 
-<!-- ═══ REVIEWS SECTION ═══ -->
+<!-- ═══ RATING SECTION ═══ -->
 <section class="detail-section">
-    <h2 class="detail-section-title">Avis et notes</h2>
+    <h2 class="detail-section-title">⭐ Notes</h2>
 
-    <!-- Average rating -->
+    <!-- Average display -->
     <div class="detail-rating-summary">
         <div class="detail-rating-big">
-            <span class="detail-rating-number">{{ getAverageRating() }}</span>
+            <span class="detail-rating-number">{{ averageRating }}</span>
             <span class="detail-rating-max">/5</span>
         </div>
         <div class="detail-rating-stars">
             @for (star of getStarArray(); track star) {
-            <span class="detail-star" [class.filled]="star <= getAverageRating()">★</span>
+            <span class="detail-star" [class.filled]="star <= averageRating">★</span>
             }
         </div>
-        <span class="detail-rating-count">{{ reviews.length }} avis</span>
+        <span class="detail-rating-count">{{ ratings.length }} note{{ ratings.length !== 1 ? 's' : '' }}</span>
     </div>
 
-    <!-- Review form (only if logged in and hasn't reviewed yet, or is editing) -->
-    @if (isLoggedIn && (!userReview || editingReview)) {
-    <div class="detail-review-form">
-        <h3>{{ editingReview ? 'Modifier votre avis' : 'Donner votre avis' }}</h3>
-
-        <div class="detail-star-picker">
-            <span>Votre note :</span>
-            <div class="detail-star-row">
-                @for (star of getStarArray(); track star) {
-                <button class="detail-star-btn"
-                    [class.filled]="star <= (hoverRating || newRating)"
-                    (mouseenter)="hoverRating = star"
-                    (mouseleave)="hoverRating = 0"
-                    (click)="setRating(star)">★</button>
-                }
-            </div>
-            <span class="detail-star-label">{{ newRating > 0 ? newRating + '/5' : '' }}</span>
-        </div>
-
-        <textarea class="detail-review-textarea" [(ngModel)]="newComment"
-            placeholder="Votre commentaire (optionnel)..." rows="4"></textarea>
-
-        <div class="detail-review-actions">
-            <button class="detail-btn detail-btn-submit" (click)="submitReview()"
-                [disabled]="newRating === 0 || submittingReview">
-                {{ submittingReview ? 'Envoi...' : (editingReview ? 'Mettre à jour' : 'Publier') }}
+    <!-- Rating input (logged in only) -->
+    @if (isLoggedIn) {
+    <div class="detail-rating-input-card">
+        <p class="detail-rating-input-label">
+            {{ userRating ? 'Votre note : ' + selectedStar + '/5' : 'Donnez votre note' }}
+        </p>
+        <div class="detail-star-row">
+            @for (star of getStarArray(); track star) {
+            <button class="detail-star-btn" [class.filled]="star <= (hoverStar || selectedStar)"
+                [class.saving]="submittingRating" (mouseenter)="hoverStar = star" (mouseleave)="hoverStar = 0"
+                (click)="submitRating(star)" [disabled]="submittingRating">
+                ★
             </button>
-            @if (editingReview) {
-            <button class="detail-btn detail-btn-cancel" (click)="editingReview = false">Annuler</button>
             }
+        </div>
+        @if (userRating) {
+        <button class="detail-rating-remove" (click)="deleteRating()">Supprimer ma note</button>
+        }
+    </div>
+    }
+</section>
+
+<!-- ═══ COMMENTS SECTION ═══ -->
+<section class="detail-section">
+    <h2 class="detail-section-title">💬 Commentaires</h2>
+
+    <!-- New comment form (logged in only) -->
+    @if (isLoggedIn) {
+    <div class="detail-comment-form">
+        <div class="detail-comment-avatar">{{ currentUser?.name?.charAt(0)?.toUpperCase() }}</div>
+        <div class="detail-comment-input-wrap">
+            <textarea class="detail-comment-textarea" [(ngModel)]="newCommentText"
+                placeholder="Partagez votre avis sur ce film…" rows="3"></textarea>
+            <div class="detail-comment-form-actions">
+                <button class="detail-btn detail-btn-submit" (click)="submitComment()"
+                    [disabled]="!newCommentText.trim() || submittingComment">
+                    {{ submittingComment ? 'Envoi…' : 'Publier' }}
+                </button>
+            </div>
         </div>
     </div>
     }
 
-    <!-- User's existing review -->
-    @if (userReview && !editingReview) {
-    <div class="detail-user-review">
-        <div class="detail-review-header">
-            <strong>Votre avis</strong>
-            <div class="detail-review-stars">
-                @for (star of getStarArray(); track star) {
-                <span class="detail-star" [class.filled]="star <= userReview.rating">★</span>
+    <!-- Comment list -->
+    <div class="detail-comments-list">
+        @if (loadingComments) {
+        <div class="detail-comments-loading">Chargement…</div>
+        } @else if (comments.length === 0) {
+        <p class="detail-no-reviews">Aucun commentaire pour le moment. Soyez le premier !</p>
+        } @else {
+        @for (comment of comments; track comment.id) {
+        <div class="detail-comment-card">
+            <div class="detail-review-avatar large">
+                {{ comment.user?.name?.charAt(0)?.toUpperCase() || '?' }}
+            </div>
+            <div class="detail-comment-body">
+                <div class="detail-comment-header">
+                    <strong class="detail-comment-author">{{ comment.user?.name || 'Anonyme' }}</strong>
+                    <span class="detail-review-date">{{ formatDate(comment.createdAt) }}</span>
+                </div>
+
+                <!-- Edit mode -->
+                @if (editingComment?.id === comment.id) {
+                <textarea class="detail-comment-textarea small" [(ngModel)]="editCommentText" rows="3"></textarea>
+                <div class="detail-comment-edit-actions">
+                    <button class="detail-btn detail-btn-submit small" (click)="saveEditComment()"
+                        [disabled]="!editCommentText.trim()">Enregistrer</button>
+                    <button class="detail-btn-sm" (click)="cancelEditComment()">Annuler</button>
+                </div>
+                } @else {
+                <p class="detail-comment-text">{{ comment.text }}</p>
+                @if (isMyComment(comment)) {
+                <div class="detail-review-user-actions">
+                    <button class="detail-btn-sm" (click)="startEditComment(comment)">✏️ Modifier</button>
+                    <button class="detail-btn-sm detail-btn-danger" (click)="deleteComment(comment.id!)">🗑️
+                        Supprimer</button>
+                </div>
+                }
                 }
             </div>
         </div>
-        @if (userReview.comment) {
-        <p class="detail-review-comment">{{ userReview.comment }}</p>
         }
-        <div class="detail-review-user-actions">
-            <button class="detail-btn-sm" (click)="editReview()">✏️ Modifier</button>
-            <button class="detail-btn-sm detail-btn-danger" (click)="deleteReview()">🗑️ Supprimer</button>
-        </div>
-    </div>
-    }
-
-    <!-- All reviews -->
-    <div class="detail-reviews-list">
-        @for (review of reviews; track review.id) {
-        @if (review.user?.email !== currentUser?.email) {
-        <div class="detail-review-card">
-            <div class="detail-review-header">
-                <div class="detail-review-user">
-                    <div class="detail-review-avatar">{{ review.user?.name?.charAt(0) || '?' }}</div>
-                    <div>
-                        <strong>{{ review.user?.name || 'Anonyme' }}</strong>
-                        <span class="detail-review-date">{{ formatDate(review.createdAt) }}</span>
-                    </div>
-                </div>
-                <div class="detail-review-stars">
-                    @for (star of getStarArray(); track star) {
-                    <span class="detail-star sm" [class.filled]="star <= review.rating">★</span>
-                    }
-                </div>
-            </div>
-            @if (review.comment) {
-            <p class="detail-review-comment">{{ review.comment }}</p>
-            }
-        </div>
-        }
-        } @empty {
-        <p class="detail-no-reviews">Aucun avis pour le moment. Soyez le premier !</p>
         }
     </div>
 </section>
@@ -184,10 +190,10 @@
             }
 
             <div class="detail-create-list">
-                <input type="text" [(ngModel)]="newListName" placeholder="Nouvelle liste..."
-                    class="detail-list-input" (keydown.enter)="createAndAdd()">
-                <button class="detail-btn detail-btn-submit" (click)="createAndAdd()"
-                    [disabled]="!newListName.trim()">+ Créer et ajouter</button>
+                <input type="text" [(ngModel)]="newListName" placeholder="Nouvelle liste..." class="detail-list-input"
+                    (keydown.enter)="createAndAdd()">
+                <button class="detail-btn detail-btn-submit" (click)="createAndAdd()" [disabled]="!newListName.trim()">+
+                    Créer et ajouter</button>
             </div>
         </div>
     </div>

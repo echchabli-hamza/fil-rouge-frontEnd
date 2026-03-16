@@ -46,6 +46,13 @@ export const routes: Routes = [
         ],
     },
 
+    // Search page (public)
+    {
+        path: 'search',
+        loadComponent: () =>
+            import('./features/search/search.component').then((m) => m.SearchComponent),
+    },
+
     // Movie detail (public)
     {
         path: 'movie/:id',

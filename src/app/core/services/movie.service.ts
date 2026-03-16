@@ -47,6 +47,10 @@ export class MovieService {
 
     // ── Public endpoints (no auth required) ──────────────────────────────────
 
+    getPublicAll(): Observable<MovieDTO[]> {
+        return this.http.get<MovieDTO[]>(this.publicBase);
+    }
+
     getPublicOne(id: number): Observable<MovieDTO> {
         return this.http.get<MovieDTO>(`${this.publicBase}/${id}`);
     }

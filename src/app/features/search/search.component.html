@@ -1,0 +1,127 @@
+<!-- ═══ SEARCH PAGE ═══ -->
+
+@if (loading) {
+<div class="search-loading">
+    <div class="home-loading-spinner"></div>
+    <p>Chargement des films…</p>
+</div>
+} @else {
+
+<!-- ── Hero / Search Bar ──────────────────────────────────────────────── -->
+<section class="search-hero">
+    <div class="search-hero-bg"></div>
+    <div class="search-hero-content">
+        <h1 class="search-hero-title">Rechercher</h1>
+        <p class="search-hero-subtitle">Trouvez votre prochain film préféré</p>
+
+        <div class="search-bar-wrapper">
+            <span class="search-bar-icon">🔍</span>
+            <input type="text" class="search-bar-input" placeholder="Rechercher un film, un acteur, un réalisateur…"
+                [value]="searchQuery" (input)="onSearchInput($event)" id="search-input" autofocus>
+            @if (searchQuery) {
+            <button class="search-bar-clear" (click)="clearFilters()">✕</button>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ── Filters ─────────────────────────────────────────────────────────── -->
+<section class="search-filters">
+    <div class="search-filters-inner">
+        <div class="search-filter-group">
+            <label class="search-filter-label">Catégorie</label>
+            <select class="search-filter-select" [value]="selectedCategoryId ?? ''"
+                (change)="onCategoryChange($any($event.target).value)" id="filter-category">
+                <option value="">Toutes</option>
+                @for (cat of categories; track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="search-filter-group">
+            <label class="search-filter-label">Année</label>
+            <select class="search-filter-select" [value]="selectedYear ?? ''"
+                (change)="onYearChange($any($event.target).value)" id="filter-year">
+                <option value="">Toutes</option>
+                @for (year of years; track year) {
+                <option [value]="year">{{ year }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="search-filter-group">
+            <label class="search-filter-label">Réalisateur</label>
+            <select class="search-filter-select" [value]="selectedDirector"
+                (change)="onDirectorChange($any($event.target).value)" id="filter-director">
+                <option value="">Tous</option>
+                @for (director of directors; track director) {
+                <option [value]="director">{{ director }}</option>
+                }
+            </select>
+        </div>
+
+        @if (hasActiveFilters) {
+        <button class="search-filter-clear" (click)="clearFilters()">
+            ✕ Réinitialiser
+        </button>
+        }
+    </div>
+
+    <div class="search-results-count">
+        <span>{{ filteredMovies.length }}</span> résultat{{ filteredMovies.length !== 1 ? 's' : '' }}
+        @if (hasActiveFilters) {
+        <span class="search-results-filtered"> (filtré{{ filteredMovies.length !== 1 ? 's' : '' }})</span>
+        }
+    </div>
+</section>
+
+<!-- ── Results Grid ────────────────────────────────────────────────────── -->
+<section class="search-results">
+    @if (filteredMovies.length > 0) {
+    <div class="search-grid">
+        @for (movie of filteredMovies; track movie.id) {
+        <div class="search-movie-card" (click)="goToMovie(movie.id)" id="movie-card-{{movie.id}}">
+            <div class="search-movie-poster">
+                @if (movie.imagePath) {
+                <img [src]="getImageUrl(movie.imagePath)" [alt]="movie.title" class="search-movie-img" loading="lazy">
+                } @else {
+                <div class="search-movie-placeholder">
+                    <span>{{ getInitials(movie.title) }}</span>
+                </div>
+                }
+                <div class="search-movie-overlay">
+                    <span class="search-movie-play">▶</span>
+                </div>
+                @if (movie.rating >= 4) {
+                <span class="search-movie-badge">⭐ Top</span>
+                }
+            </div>
+            <div class="search-movie-info">
+                <h3 class="search-movie-title">{{ movie.title }}</h3>
+                <div class="search-movie-meta">
+                    <span class="search-movie-year">{{ movie.releaseYear }}</span>
+                    <span class="search-movie-dot">·</span>
+                    <span class="search-movie-rating">⭐ {{ movie.rating }}/5</span>
+                </div>
+                <div class="search-movie-details">
+                    <span class="search-movie-director">🎬 {{ movie.director }}</span>
+                    @if (movie.categoryName) {
+                    <span class="search-movie-category">{{ movie.categoryName }}</span>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    } @else {
+    <div class="search-empty">
+        <div class="search-empty-icon">🎬</div>
+        <h3 class="search-empty-title">Aucun film trouvé</h3>
+        <p class="search-empty-text">Essayez de modifier vos filtres ou votre recherche.</p>
+        <button class="btn-secondary" (click)="clearFilters()">Réinitialiser les filtres</button>
+    </div>
+    }
+</section>
+
+}
