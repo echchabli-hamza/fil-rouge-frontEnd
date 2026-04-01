@@ -142,7 +142,7 @@
     </div>
     <div class="home-category-grid">
         @for (cat of categories; track cat.id) {
-        <div class="home-category-card">
+        <div class="home-category-card" (click)="goToCategory(cat)">
             <span class="home-category-icon">{{ getCategoryIcon(cat.name) }}</span>
             <span class="home-category-name">{{ cat.name }}</span>
         </div>

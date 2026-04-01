@@ -139,4 +139,10 @@ export class LandingComponent implements OnInit, OnDestroy {
     goToMovie(id: number): void {
         this.router.navigate(['/movie', id]);
     }
+
+    goToCategory(category: Category): void {
+        this.router.navigate(['/search'], {
+            queryParams: { categoryId: category.id }
+        });
+    }
 }
