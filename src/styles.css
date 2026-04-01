@@ -774,6 +774,34 @@ body {
     linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
 }
 
+.detail-back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 6%;
+  z-index: 10;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-back-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.detail-back-btn:active {
+  transform: scale(0.98);
+}
+
 .detail-hero-content {
   position: relative;
   z-index: 2;

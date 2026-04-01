@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MovieService } from '../../core/services/movie.service';
@@ -19,6 +19,7 @@ import { environment } from '../../../environments/environment';
 })
 export class MovieDetailComponent implements OnInit {
     private route = inject(ActivatedRoute);
+    private location = inject(Location);
     private movieService = inject(MovieService);
     private commentService = inject(CommentService);
     private ratingService = inject(RatingService);
@@ -58,6 +59,10 @@ export class MovieDetailComponent implements OnInit {
 
     get isLoggedIn(): boolean { return this.auth.isLoggedIn(); }
     get currentUser() { return this.auth.getUser(); }
+
+    goBack(): void {
+        this.location.back();
+    }
 
     get averageRating(): number {
         if (!this.ratings.length) return 0;

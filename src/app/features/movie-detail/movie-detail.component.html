@@ -1,4 +1,4 @@
-@if (loading) {
+ @if (loading) {
 <div class="detail-loading">
     <div class="home-loading-spinner"></div>
 </div>
@@ -10,6 +10,10 @@
         [style.background-image]="movie.imagePath ? 'url(' + getImageUrl(movie.imagePath) + ')' : ''">
     </div>
     <div class="detail-hero-overlay"></div>
+
+    <button class="detail-back-btn" (click)="goBack()" title="Retourner à la page précédente">
+        ← Retour
+    </button>
 
     <div class="detail-hero-content">
         <div class="detail-poster">
