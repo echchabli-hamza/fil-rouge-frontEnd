@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MovieService } from '../../core/services/movie.service';
 import { CategoryService } from '../../core/services/category.service';
 import { MovieDTO, Category } from '../../core/models/admin.models';
@@ -19,6 +19,7 @@ export class SearchComponent implements OnInit {
     private movieService = inject(MovieService);
     private categoryService = inject(CategoryService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
     private cdr = inject(ChangeDetectorRef);
 
     readonly apiUrl = environment.apiUrl;
@@ -43,6 +44,14 @@ export class SearchComponent implements OnInit {
     private searchSubject = new Subject<string>();
 
     ngOnInit(): void {
+        // Check for category filter from query params
+        this.route.queryParamMap.subscribe(params => {
+            const categoryId = params.get('categoryId');
+            if (categoryId) {
+                this.selectedCategoryId = +categoryId;
+            }
+        });
+
         this.loadCategories();
         this.loadAllMovies();
 
