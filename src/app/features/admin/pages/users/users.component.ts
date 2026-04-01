@@ -35,7 +35,8 @@ export class UsersComponent implements OnInit {
             },
             error: (err: any) => {
                 console.error('Error loading users:', err);
-                this.error = 'Failed to load users';
+                const errorMsg = err?.error?.message || err?.statusText || 'Failed to load users';
+                this.error = errorMsg;
                 this.loading = false;
                 this.cdr.detectChanges();
             }
@@ -58,7 +59,8 @@ export class UsersComponent implements OnInit {
             },
             error: (err: any) => {
                 console.error('Error updating user status:', err);
-                this.error = 'Failed to update user status';
+                const errorMsg = err?.error?.message || err?.statusText || 'Failed to update user status';
+                this.error = errorMsg;
                 this.updating[user.id] = false;
                 this.cdr.detectChanges();
             }
