@@ -43,6 +43,11 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./features/admin/pages/movies/movies.component').then((m) => m.MoviesComponent),
             },
+            {
+                path: 'users',
+                loadComponent: () =>
+                    import('./features/admin/pages/users/users.component').then((m) => m.UsersComponent),
+            },
         ],
     },
 
