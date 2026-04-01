@@ -1,0 +1,69 @@
+<div class="admin-page">
+    <div class="admin-page-header">
+        <h1>👥 Gestion des Utilisateurs</h1>
+    </div>
+
+    @if (error) {
+    <div class="admin-toast admin-toast-error">
+        {{ error }}
+    </div>
+    }
+
+    @if (successMessage) {
+    <div class="admin-toast admin-toast-success">
+        {{ successMessage }}
+    </div>
+    }
+
+    @if (loading) {
+    <div class="admin-loading">
+        <div class="admin-loading-spinner"></div>
+    </div>
+    } @else {
+    <div class="admin-table-wrap">
+        @if (users.length === 0) {
+        <div class="admin-empty">
+            <p>Aucun utilisateur trouvé</p>
+        </div>
+        } @else {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (user of users; track user.id) {
+                <tr>
+                    <td>#{{ user.id }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="admin-badge" [style.background-color]="getRoleColor(user.role)">
+                            {{ user.role }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="admin-status" [class.active]="user.active">
+                            {{ user.active ? '✓ Actif' : '✗ Inactif' }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="admin-toggle-btn" (click)="toggleUserStatus(user)"
+                            [disabled]="updating[user.id]" [class.loading]="updating[user.id]">
+                            {{ updating[user.id] ? '...' : (user.active ? 'Désactiver' : 'Activer') }}
+                        </button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+    }
+</div>
