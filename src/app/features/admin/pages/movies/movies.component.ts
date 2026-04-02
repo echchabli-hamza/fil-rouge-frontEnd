@@ -136,7 +136,7 @@ export class MoviesComponent implements OnInit {
     }
 
     private emptyForm(): Movie {
-        return { title: '', synopsis: '', releaseYear: undefined, director: '', actors: '', popularityScore: undefined };
+        return { title: '', synopsis: '', releaseYear: undefined, director: '', actors: '', popularityScore: undefined, trailerUrl: '' };
     }
 
     private showSuccess(msg: string): void {

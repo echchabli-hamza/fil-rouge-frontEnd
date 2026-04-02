@@ -66,6 +66,11 @@
             @if (imagePreview) {
             <img [src]="imagePreview" alt="preview" class="admin-img-preview" />
             }
+            <div class="admin-form-group">
+                <label>URL de la bande-annonce (YouTube)</label>
+                <input class="admin-input" type="url" [(ngModel)]="form.trailerUrl" name="trailerUrl"
+                    placeholder="https://www.youtube.com/embed/..." />
+            </div>
             <div class="admin-form-actions">
                 <button type="button" class="btn-admin-secondary" (click)="closeForm()">Annuler</button>
                 <button type="submit" class="btn-admin-primary" [disabled]="saving">
