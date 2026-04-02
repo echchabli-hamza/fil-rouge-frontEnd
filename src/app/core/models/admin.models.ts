@@ -18,6 +18,7 @@ export interface Movie {
     rating?: number;
     category?: Category;
     categoryName?: string;
+    trailerUrl?: string;
 }
 
 /** Matches the backend MovieDTO returned by public endpoints */
@@ -30,6 +31,7 @@ export interface MovieDTO {
     actors: string;
     popularityScore: number;
     imagePath: string;
+    trailerUrl?: string;
     rating: number;
     categoryId: number;
     categoryName: string;
