@@ -16,6 +16,27 @@
   --cinema-mist: rgba(255, 255, 255, 0.08);
 }
 
+/* Light theme (default) */
+:root,
+:root.light-theme {
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --card-bg: #f9f9f9;
+  --input-bg: #ffffff;
+  --border-color: #e0e0e0;
+  --disabled-bg: #f0f0f0;
+}
+
+/* Dark theme */
+:root.dark-theme {
+  --text-primary: #e8e4dc;
+  --text-secondary: #b0b0b0;
+  --card-bg: #1a1a1a;
+  --input-bg: #2a2a2a;
+  --border-color: #3a3a3a;
+  --disabled-bg: #141414;
+}
+
 *,
 *::before,
 *::after {

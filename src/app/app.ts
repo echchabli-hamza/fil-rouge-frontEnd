@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { NavbarComponent } from './shared/layout/navbar/navbar.component';
+import { ThemeService } from './core/services/theme.service';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -11,6 +12,7 @@ import { filter } from 'rxjs/operators';
 })
 export class App implements OnInit {
     private router = inject(Router);
+    private themeService = inject(ThemeService);
     hideNavbar = signal(false);
 
     ngOnInit(): void {

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
     selector: 'app-settings',
@@ -14,6 +15,7 @@ import { ProfileService } from '../../core/services/profile.service';
 export class SettingsComponent implements OnInit {
     private authService = inject(AuthService);
     private profileService = inject(ProfileService);
+    public themeService = inject(ThemeService);
 
     // Username form
     newUsername = '';
