@@ -1,0 +1,83 @@
+<div class="settings-container">
+    <div class="settings-header">
+        <h1>Settings</h1>
+    </div>
+
+    <!-- Username Update Section -->
+    <div class="settings-section">
+        <h2>Change Username</h2>
+        <div *ngIf="usernameMessage" [class.success]="!usernameError" [class.error]="usernameError" class="alert">
+            {{ usernameMessage }}
+        </div>
+        <form (ngSubmit)="updateUsername()" class="form-group">
+            <div class="form-field">
+                <label for="new-username">New Username</label>
+                <input 
+                    type="text" 
+                    id="new-username" 
+                    [(ngModel)]="newUsername" 
+                    name="newUsername"
+                    placeholder="Enter new username"
+                    [disabled]="usernameLoading"
+                />
+            </div>
+            <button 
+                type="submit" 
+                class="btn btn-primary" 
+                [disabled]="usernameLoading"
+            >
+                {{ usernameLoading ? 'Updating...' : 'Update Username' }}
+            </button>
+        </form>
+    </div>
+
+    <!-- Password Change Section -->
+    <div class="settings-section">
+        <h2>Change Password</h2>
+        <div *ngIf="passwordMessage" [class.success]="!passwordError" [class.error]="passwordError" class="alert">
+            {{ passwordMessage }}
+        </div>
+        <form (ngSubmit)="updatePassword()" class="form-group">
+            <div class="form-field">
+                <label for="current-password">Current Password</label>
+                <input 
+                    type="password" 
+                    id="current-password" 
+                    [(ngModel)]="currentPassword" 
+                    name="currentPassword"
+                    placeholder="Enter current password"
+                    [disabled]="passwordLoading"
+                />
+            </div>
+            <div class="form-field">
+                <label for="new-password">New Password</label>
+                <input 
+                    type="password" 
+                    id="new-password" 
+                    [(ngModel)]="newPassword" 
+                    name="newPassword"
+                    placeholder="Enter new password (min 6 characters)"
+                    [disabled]="passwordLoading"
+                />
+            </div>
+            <div class="form-field">
+                <label for="confirm-password">Confirm Password</label>
+                <input 
+                    type="password" 
+                    id="confirm-password" 
+                    [(ngModel)]="confirmPassword" 
+                    name="confirmPassword"
+                    placeholder="Confirm new password"
+                    [disabled]="passwordLoading"
+                />
+            </div>
+            <button 
+                type="submit" 
+                class="btn btn-primary" 
+                [disabled]="passwordLoading"
+            >
+                {{ passwordLoading ? 'Updating...' : 'Update Password' }}
+            </button>
+        </form>
+    </div>
+</div>
