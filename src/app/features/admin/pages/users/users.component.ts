@@ -34,9 +34,7 @@ export class UsersComponent implements OnInit {
                 this.cdr.detectChanges();
             },
             error: (err: any) => {
-                console.error('Error loading users:', err);
-                const errorMsg = err?.error?.message || err?.statusText || 'Failed to load users';
-                this.error = errorMsg;
+                this.error = 'Failed to load users';
                 this.loading = false;
                 this.cdr.detectChanges();
             }
@@ -58,28 +56,7 @@ export class UsersComponent implements OnInit {
                 this.cdr.detectChanges();
             },
             error: (err: any) => {
-                console.error('Full error object:', err);
-                console.error('Error status:', err?.status);
-                console.error('Error statusText:', err?.statusText);
-                console.error('Error message:', err?.message);
-                console.error('Error response:', err?.error);
-                
-                let errorMsg = 'Unknown Error';
-                if (err?.status === 401) {
-                    errorMsg = 'Unauthorized - Please login again';
-                } else if (err?.status === 403) {
-                    errorMsg = 'Forbidden - You do not have permission to update users';
-                } else if (err?.status === 404) {
-                    errorMsg = 'User not found';
-                } else if (err?.statusText) {
-                    errorMsg = err.statusText;
-                } else if (err?.error?.message) {
-                    errorMsg = err.error.message;
-                } else if (err?.message) {
-                    errorMsg = err.message;
-                }
-                
-                this.error = errorMsg;
+                this.error = err?.statusText || 'Failed to update user status';
                 this.updating[user.id] = false;
                 this.cdr.detectChanges();
             }
