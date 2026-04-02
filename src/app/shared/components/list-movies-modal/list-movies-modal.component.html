@@ -1,0 +1,45 @@
+<div *ngIf="isOpen" class="modal-backdrop" (click)="onBackdropClick()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <div class="modal-header">
+            <h2>{{ list?.title }}</h2>
+            <button class="modal-close" (click)="closeModal()" aria-label="Close">✕</button>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="loading" class="modal-loading">
+            <p>Loading movies...</p>
+        </div>
+
+        <!-- No Movies -->
+        <div *ngIf="!loading && movies.length === 0" class="modal-empty">
+            <p>No movies in this list</p>
+        </div>
+
+        <!-- Movies Grid -->
+        <div *ngIf="!loading && movies.length > 0" class="modal-movies-grid">
+            <div *ngFor="let movie of movies" class="modal-movie-card" (click)="navigateToMovie(movie.id)" style="cursor: pointer;">
+                <div class="movie-poster-container">
+                    <img 
+                        [src]="getImageUrl(movie.imagePath)" 
+                        [alt]="movie.title"
+                        class="movie-poster"
+                    >
+                    <div class="movie-overlay">
+                        <div class="movie-info">
+                            <h4>{{ movie.title }}</h4>
+                            <p class="year">{{ movie.releaseYear }}</p>
+                            <p class="rating">⭐ {{ movie.rating | number: '1.1-1' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <p class="movie-count">{{ movies.length }} {{ movies.length === 1 ? 'movie' : 'movies' }}</p>
+            <button class="btn-close" (click)="closeModal()">Close</button>
+        </div>
+    </div>
+</div>

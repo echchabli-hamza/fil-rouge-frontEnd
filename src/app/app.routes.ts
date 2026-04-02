@@ -65,6 +65,13 @@ export const routes: Routes = [
             import('./features/movie-detail/movie-detail.component').then((m) => m.MovieDetailComponent),
     },
 
+    // Public lists (public)
+    {
+        path: 'lists',
+        loadComponent: () =>
+            import('./features/user-lists/user-lists.component').then((m) => m.UserListsComponent),
+    },
+
     // Protected pages (auth required)
     {
         path: 'profile',

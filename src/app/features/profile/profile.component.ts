@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { FavoriteService } from '../../core/services/favorite.service';
@@ -21,7 +21,7 @@ interface ProfileList {
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
     templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {

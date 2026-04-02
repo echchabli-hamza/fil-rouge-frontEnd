@@ -13,6 +13,7 @@
         @if ((user?.role ?? '').toLowerCase() === 'admin') {
         <a routerLink="/dash" routerLinkActive="active" class="navbar-link">Tableau de bord</a>
         }
+        <a routerLink="/lists" routerLinkActive="active" class="navbar-link">📚 Listes</a>
         <a routerLink="/profile" routerLinkActive="active" class="navbar-link">Profil</a>
         <a routerLink="/settings" routerLinkActive="active" class="navbar-link">Paramètres</a>
         <div class="navbar-user">

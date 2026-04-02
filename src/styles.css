@@ -16,31 +16,6 @@
   --cinema-mist: rgba(255, 255, 255, 0.08);
 }
 
-/* Light theme (default) */
-:root,
-:root.light-theme {
-  --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --card-bg: #f9f9f9;
-  --input-bg: #ffffff;
-  --border-color: #e0e0e0;
-  --disabled-bg: #f0f0f0;
-  --theme-bg: #ffffff;
-  --theme-text: #1a1a1a;
-}
-
-/* Dark theme */
-:root.dark-theme {
-  --text-primary: #e8e4dc;
-  --text-secondary: #b0b0b0;
-  --card-bg: #1a1a1a;
-  --input-bg: #2a2a2a;
-  --border-color: #3a3a3a;
-  --disabled-bg: #141414;
-  --theme-bg: #0a0a0a;
-  --theme-text: #e8e4dc;
-}
-
 *,
 *::before,
 *::after {
@@ -53,12 +28,11 @@ html {
 
 body {
   margin: 0;
-  background: var(--theme-bg, var(--cinema-black));
-  color: var(--theme-text, var(--cinema-cream));
+  background: var(--cinema-black);
+  color: var(--cinema-cream);
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Auth pages - full bleed, no navbar on auth */
@@ -93,12 +67,11 @@ body {
   position: relative;
   width: 100%;
   max-width: 420px;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  background: linear-gradient(180deg, rgba(26, 26, 26, 0.95) 0%, rgba(20, 20, 20, 0.98) 100%);
+  border: 1px solid var(--cinema-mist);
   border-radius: 12px;
   padding: 2.5rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .auth-header {
@@ -127,15 +100,13 @@ body {
   font-weight: 600;
   font-size: 1.75rem;
   margin: 0 0 0.5rem;
-  color: var(--text-primary);
-  transition: color 0.3s;
+  color: var(--cinema-cream);
 }
 
 .auth-header p {
   margin: 0;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.9rem;
-  transition: color 0.3s;
 }
 
 .auth-form {
@@ -161,25 +132,23 @@ body {
 
 .form-group label {
   font-size: 0.85rem;
-  color: var(--text-primary);
-  transition: color 0.3s;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .form-input {
   width: 100%;
   padding: 0.875rem 1rem;
-  background: var(--input-bg);
-  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: var(--text-primary);
+  color: var(--cinema-cream);
   font-family: inherit;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-input::placeholder {
-  color: var(--text-secondary);
-  opacity: 0.5;
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .form-input:focus {
@@ -203,8 +172,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: var(--text-primary);
-  transition: color 0.3s;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .checkbox-wrap input {
@@ -242,8 +210,7 @@ body {
   margin-top: 2rem;
   text-align: center;
   font-size: 0.9rem;
-  color: var(--text-secondary);
-  transition: color 0.3s;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .auth-footer a {
@@ -268,8 +235,7 @@ body {
   height: 85vh;
   min-height: 500px;
   overflow: hidden;
-  background: var(--theme-bg, var(--cinema-black));
-  transition: background 0.3s;
+  background: var(--cinema-black);
 }
 
 .home-hero-grain {
@@ -1607,13 +1573,8 @@ body {
   justify-content: space-between;
   padding: 1rem 2rem;
   background: rgba(10, 10, 10, 0.9);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--cinema-mist);
   backdrop-filter: blur(12px);
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-:root.light-theme .navbar {
-  background: rgba(255, 255, 255, 0.95);
 }
 
 .navbar-auth {
@@ -1647,10 +1608,6 @@ body {
   font-size: 0.95rem;
   font-weight: 500;
   transition: color 0.2s;
-}
-
-:root.light-theme .navbar-link {
-  color: var(--text-secondary);
 }
 
 .navbar-link:hover,
@@ -1692,10 +1649,6 @@ body {
   transition: color 0.2s;
 }
 
-:root.light-theme .navbar-logout {
-  color: var(--text-secondary);
-}
-
 .navbar-logout:hover {
   color: var(--cinema-red-light);
 }
@@ -1713,8 +1666,7 @@ body {
 .navbar-toggle span {
   width: 24px;
   height: 2px;
-  background: var(--theme-text);
-  transition: background-color 0.3s;
+  background: var(--cinema-cream);
 }
 
 @media (max-width: 768px) {
@@ -1749,8 +1701,7 @@ body {
 .dashboard {
   min-height: calc(100vh - 64px);
   padding: 2rem;
-  background: var(--theme-bg, var(--cinema-dark));
-  transition: background-color 0.3s;
+  background: var(--cinema-dark);
 }
 
 .dashboard-header h1 {
@@ -1758,8 +1709,7 @@ body {
   font-weight: 600;
   font-size: 1.75rem;
   margin: 0 0 0.5rem;
-  color: var(--theme-text, var(--cinema-cream));
-  transition: color 0.3s;
+  color: var(--cinema-cream);
 }
 
 .dashboard-header p {
@@ -2497,6 +2447,16 @@ select.admin-input option {
 .profile-tab.active {
   color: var(--cinema-gold);
   border-bottom-color: var(--cinema-gold);
+}
+
+.profile-tab-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.profile-tab-link:hover {
+  color: var(--cinema-gold);
 }
 
 /* ── Content area ────────────────────────────────────────────────────────── */

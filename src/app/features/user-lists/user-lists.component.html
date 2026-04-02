@@ -1,0 +1,74 @@
+<div class="user-lists-container">
+    <div class="page-header">
+        <h1>Public Lists</h1>
+        <p>Discover and browse lists created by other users</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <input 
+            type="text" 
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="Search lists by title..."
+            class="search-input"
+        >
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading">
+        <p>Loading public lists...</p>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="!loading && filteredLists.length === 0" class="no-results">
+        <p>No public lists found.</p>
+    </div>
+
+    <!-- Lists Grid -->
+    <div *ngIf="!loading && filteredLists.length > 0" class="lists-wrapper">
+        <div class="results-info">
+            <p>Found {{ filteredLists.length }} public {{ filteredLists.length === 1 ? 'list' : 'lists' }}</p>
+        </div>
+
+        <div class="lists-grid">
+            <div *ngFor="let list of paginatedLists" class="list-card">
+                <div class="list-header">
+                    <h3>{{ list.title }}</h3>
+                    <span class="list-count">{{ list.movies?.length || 0 }} movies</span>
+                </div>
+
+                <div class="list-actions">
+                    <button 
+                        (click)="openModal(list)"
+                        class="expand-btn"
+                    >
+                        View Movies
+                    </button>
+                </div>
+
+                <!-- Remove expanded content section -->
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="filteredLists.length > itemsPerPage" class="pagination">
+            <button (click)="previousPage()" [disabled]="currentPage === 1" class="page-btn">
+                ← Previous
+            </button>
+            <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="page-btn">
+                Next →
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <app-list-movies-modal
+        [isOpen]="modalOpen"
+        [list]="modalList"
+        [movies]="modalMovies"
+        [loading]="modalLoading"
+        (close)="closeModal()"
+    ></app-list-movies-modal>
+</div>

@@ -80,27 +80,4 @@
             </button>
         </form>
     </div>
-
-    <!-- Theme Section -->
-    <div class="settings-section">
-        <h2>Theme</h2>
-        <div class="theme-options">
-            <button 
-                type="button"
-                class="theme-btn" 
-                [class.active]="themeService.theme() === 'light'"
-                (click)="themeService.setTheme('light')"
-            >
-                ☀️ Light
-            </button>
-            <button 
-                type="button"
-                class="theme-btn" 
-                [class.active]="themeService.theme() === 'dark'"
-                (click)="themeService.setTheme('dark')"
-            >
-                🌙 Dark
-            </button>
-        </div>
-    </div>
 </div>

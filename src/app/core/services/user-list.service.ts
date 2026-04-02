@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserList, ListMovie } from '../models/admin.models';
+import { UserList, ListMovie, MovieDTO } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -53,5 +53,10 @@ export class UserListService {
     /** GET /user/list-movies/{listId} */
     getMoviesInList(listId: number): Observable<ListMovie[]> {
         return this.http.get<ListMovie[]>(`${this.listMovieBase}/${listId}`);
+    }
+
+    /** GET /user/lists/{id}/movies - Get movies of a list */
+    getListMovies(listId: number): Observable<MovieDTO[]> {
+        return this.http.get<MovieDTO[]>(`${this.listBase}/${listId}/movies`);
     }
 }

@@ -1,0 +1,273 @@
+.user-lists-container {
+    min-height: 100vh;
+    background-color: #0a0a0a;
+    color: #e8e4dc;
+    padding: 40px 20px;
+}
+
+.page-header {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    color: #d4af37;
+    margin: 0 0 10px;
+    letter-spacing: 2px;
+}
+
+.page-header p {
+    font-size: 16px;
+    color: #b0aca3;
+    margin: 0;
+}
+
+/* Search Section */
+.search-section {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 15px 20px;
+    background-color: #1a1a1a;
+    border: 2px solid #2a2a2a;
+    color: #e8e4dc;
+    border-radius: 4px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #d4af37;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.search-input::placeholder {
+    color: #7a7a72;
+}
+
+/* Loading & No Results */
+.loading,
+.no-results {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    font-size: 18px;
+    color: #b0aca3;
+    text-align: center;
+}
+
+/* Lists Wrapper */
+.lists-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.results-info {
+    font-size: 14px;
+    color: #b0aca3;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Lists Grid */
+.lists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.list-card {
+    background-color: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.list-card:hover {
+    border-color: #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.list-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #d4af37;
+    margin: 0;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.list-count {
+    background-color: #2a2a2a;
+    color: #b0aca3;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
+/* List Actions */
+.list-actions {
+    margin-bottom: 16px;
+}
+
+.expand-btn {
+    width: 100%;
+    background-color: transparent;
+    color: #d4af37;
+    border: 2px solid #d4af37;
+    padding: 10px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.expand-btn:hover {
+    background-color: #d4af37;
+    color: #0a0a0a;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
+    padding: 20px 0;
+    border-top: 1px solid #2a2a2a;
+}
+
+.page-btn {
+    background-color: transparent;
+    color: #d4af37;
+    border: 2px solid #d4af37;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #d4af37;
+    color: #0a0a0a;
+    transform: translateY(-2px);
+}
+
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-size: 14px;
+    color: #b0aca3;
+    min-width: 150px;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .lists-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+    }
+
+    .page-header p {
+        font-size: 14px;
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .page-btn {
+        width: 100%;
+    }
+
+    .page-info {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .lists-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+
+    .page-header {
+        margin-bottom: 20px;
+    }
+
+    .search-input {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .list-card {
+        padding: 16px;
+    }
+
+    .list-header {
+        flex-direction: column;
+    }
+
+    .list-count {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+
+    .movie-item {
+        gap: 10px;
+        padding: 6px;
+    }
+
+    .movie-thumb {
+        width: 45px;
+        height: 67px;
+    }
+
+    .movie-details h4 {
+        font-size: 12px;
+    }
+
+    .expand-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
