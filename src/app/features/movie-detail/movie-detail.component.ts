@@ -9,12 +9,13 @@ import { FavoriteService } from '../../core/services/favorite.service';
 import { UserListService } from '../../core/services/user-list.service';
 import { AuthService } from '../../core/services/auth.service';
 import { MovieDTO, UserList } from '../../core/models/admin.models';
+import { TrailerModalComponent } from '../../shared/components/trailer-modal/trailer-modal.component';
 import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'app-movie-detail',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, TrailerModalComponent],
     templateUrl: './movie-detail.component.html',
 })
 export class MovieDetailComponent implements OnInit {
@@ -56,6 +57,9 @@ export class MovieDetailComponent implements OnInit {
     userLists: UserList[] = [];
     showListModal = false;
     newListName = '';
+
+    // ── Trailer modal ───────────────────────────────────────────────────────
+    showTrailerModal = false;
 
     get isLoggedIn(): boolean { return this.auth.isLoggedIn(); }
     get currentUser() { return this.auth.getUser(); }
@@ -293,5 +297,17 @@ export class MovieDetailComponent implements OnInit {
         return new Date(dateStr).toLocaleDateString('fr-FR', {
             day: 'numeric', month: 'long', year: 'numeric'
         });
+    }
+
+    // ── Trailer modal ───────────────────────────────────────────────────────
+
+    openTrailerModal(): void {
+        this.showTrailerModal = true;
+        this.cdr.detectChanges();
+    }
+
+    closeTrailerModal(): void {
+        this.showTrailerModal = false;
+        this.cdr.detectChanges();
     }
 }

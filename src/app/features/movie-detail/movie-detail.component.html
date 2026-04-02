@@ -50,6 +50,9 @@
             </div>
 
             <div class="detail-actions">
+                <button class="detail-btn detail-btn-trailer" (click)="openTrailerModal()">
+                    🎬 Regarder la bande-annonce
+                </button>
                 <button class="detail-btn detail-btn-fav" [class.active]="isFavorite" (click)="toggleFavorite()"
                     [disabled]="!isLoggedIn">
                     {{ isFavorite ? '❤️ Favori' : '🤍 Ajouter aux favoris' }}
@@ -204,6 +207,12 @@
 </div>
 }
 
+<!-- Trailer Modal -->
+<app-trailer-modal 
+    [isOpen]="showTrailerModal" 
+    [trailerUrl]="movie.trailerUrl || null"
+    (closeModal)="closeTrailerModal()">
+</app-trailer-modal>
 } @else {
 <div class="detail-not-found">
     <h2>Film introuvable</h2>
